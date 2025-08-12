@@ -14,6 +14,14 @@ import dotenv from 'dotenv';
 
 import { getDatabase } from '@/utils/database';
 import { errorHandler, notFoundHandler } from '@/utils/middleware';
+import { TrieService } from '@/services/TrieService';
+
+// Import route handlers
+import suggestRoutes from '@/routes/suggest';
+import selectRoutes from '@/routes/select';
+import insertRoutes from '@/routes/insert';
+import exportRoutes from '@/routes/export';
+import adminRoutes from '@/routes/admin';
 
 // Load environment variables
 dotenv.config();
@@ -87,12 +95,16 @@ io.on('connection', (socket) => {
 // Make io available to routes
 app.set('io', io);
 
-// API Routes will be added here
-// app.use('/api/suggest', suggestRoutes);
-// app.use('/api/select', selectRoutes);
-// app.use('/api/insert', insertRoutes);
-// app.use('/api/export-trie', exportRoutes);
-// app.use('/api/admin', adminRoutes);
+// Initialize TrieService with Socket.IO
+const trieService = TrieService.getInstance();
+trieService.initialize(io);
+
+// API Routes
+app.use('/api/suggest', suggestRoutes);
+app.use('/api/select', selectRoutes);
+app.use('/api/insert', insertRoutes);
+app.use('/api/export-trie', exportRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use(notFoundHandler);
@@ -115,8 +127,10 @@ async function startServer() {
       throw new Error('Failed to connect to database');
     }
 
-    // TODO: Initialize Trie with data from database
+    // Initialize Trie with data from database
     console.log('Initializing Trie with database data...');
+    await trieService.loadFromDatabase();
+    console.log('✅ Trie initialization completed');
 
     // Start server
     server.listen(PORT, () => {
