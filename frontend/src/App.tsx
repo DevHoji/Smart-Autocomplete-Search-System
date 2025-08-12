@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Mic, Image, Settings, BarChart3, Download } from 'lucide-react';
 import { apiService } from './services/api';
-import { AnalyticsData } from './types';
+import { AnalyticsData, Suggestion } from './types';
+import Autocomplete from './components/Autocomplete';
+import KeyboardShortcuts from './components/KeyboardShortcuts';
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string>('');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
 
   useEffect(() => {
     // Test API connection on startup
@@ -31,6 +34,17 @@ function App() {
 
     testConnection();
   }, []);
+
+  // Handle suggestion selection
+  const handleSuggestionSelect = (suggestion: Suggestion) => {
+    setSelectedSuggestion(suggestion);
+    console.log('Selected suggestion:', suggestion);
+  };
+
+  // Handle search
+  const handleSearch = (query: string) => {
+    console.log('Search query:', query);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -64,6 +78,7 @@ function App() {
               </div>
 
               {/* Action Buttons */}
+              <KeyboardShortcuts />
               <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <Settings className="w-5 h-5" />
               </button>
@@ -112,33 +127,51 @@ function App() {
                 and real-time learning powered by a server-side Trie data structure.
               </p>
 
-              {/* Search Input Placeholder */}
+              {/* Autocomplete Search */}
               <div className="max-w-2xl mx-auto">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Start typing to see autocomplete suggestions..."
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent shadow-sm"
-                    disabled={!isConnected}
-                  />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-primary-600 transition-colors">
-                      <Mic className="w-5 h-5" />
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-primary-600 transition-colors">
-                      <Image className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
+                <Autocomplete
+                  placeholder="Start typing to see autocomplete suggestions..."
+                  maxSuggestions={10}
+                  onSelect={handleSuggestionSelect}
+                  onSearch={handleSearch}
+                  className="mb-4"
+                />
 
-                {/* Placeholder for suggestions dropdown */}
-                <div className="mt-2 text-sm text-gray-500">
+                {/* Connection Status */}
+                <div className="text-center text-sm text-gray-500">
                   {isConnected ? (
                     `Connected to backend with ${analytics?.trie_stats?.word_count || 0} words loaded`
                   ) : (
                     'Waiting for backend connection...'
                   )}
                 </div>
+
+                {/* Selected Suggestion Display */}
+                {selectedSuggestion && (
+                  <div className="mt-4 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                    <h4 className="font-medium text-primary-900 mb-2">Selected:</h4>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-lg font-semibold text-primary-800">
+                          {selectedSuggestion.word}
+                        </span>
+                        {selectedSuggestion.category && (
+                          <span className="ml-2 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
+                            {selectedSuggestion.category}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm text-primary-600">
+                        Frequency: {selectedSuggestion.freq}
+                      </span>
+                    </div>
+                    {selectedSuggestion.synonyms && selectedSuggestion.synonyms.length > 0 && (
+                      <div className="mt-2 text-sm text-primary-700">
+                        <strong>Synonyms:</strong> {selectedSuggestion.synonyms.join(', ')}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
