@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { VoiceState, UseVoiceReturn } from '../types';
+import { VoiceState, UseVoiceReturn } from '../types/index';
 
 interface UseVoiceInputOptions {
   language?: string;

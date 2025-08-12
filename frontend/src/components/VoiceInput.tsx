@@ -7,7 +7,7 @@ import React, { useEffect } from 'react';
 import { Mic, MicOff, Volume2, VolumeX, AlertCircle } from 'lucide-react';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
-import { VoiceInputProps } from '../types';
+import { VoiceInputProps } from '../types/index';
 
 const VoiceInput: React.FC<VoiceInputProps> = ({
   onTranscript,

@@ -6,7 +6,7 @@
 import React, { useRef, useState } from 'react';
 import { Image, Upload, X, Loader2, FileText, Camera, AlertCircle } from 'lucide-react';
 import { useImageOCR } from '../hooks/useImageOCR';
-import { ImageUploadProps } from '../types';
+import { ImageUploadProps } from '../types/index';
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
   onTextExtracted,
