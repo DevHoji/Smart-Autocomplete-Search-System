@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Mic, Image, Settings, BarChart3, Download } from 'lucide-react';
+import { Search, Mic, Image, Settings as SettingsIcon, BarChart3, Download } from 'lucide-react';
 import { apiService } from './services/api';
 import type { AnalyticsData, Suggestion } from './types/index';
 import Autocomplete from './components/Autocomplete';
@@ -8,7 +8,6 @@ import KeyboardShortcuts from './components/KeyboardShortcuts';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Settings from './components/Settings';
 import DownloadModal from './components/DownloadModal';
-import Settings from './components/Settings';
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
@@ -98,7 +97,7 @@ function App() {
                 }`}
                 title="Settings"
               >
-                <Settings className="w-5 h-5" />
+                <SettingsIcon className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setCurrentView(currentView === 'analytics' ? 'search' : 'analytics')}
