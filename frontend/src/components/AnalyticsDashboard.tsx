@@ -4,17 +4,18 @@
  */
 
 import React, { useState } from 'react';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  Search, 
-  Target, 
-  Clock, 
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  Search,
+  Target,
+  Clock,
   RefreshCw,
   Calendar,
   Download,
-  Filter
+  Filter,
+  ArrowLeft
 } from 'lucide-react';
 import { useAnalytics } from '../hooks/useAnalytics';
 import MetricCard from './MetricCard';
@@ -22,7 +23,11 @@ import TopQueriesChart from './TopQueriesChart';
 import TrendingWordsChart from './TrendingWordsChart';
 import PerformanceChart from './PerformanceChart';
 
-const AnalyticsDashboard: React.FC = () => {
+interface AnalyticsDashboardProps {
+  onBack?: () => void;
+}
+
+const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
   const [selectedPeriod, setSelectedPeriod] = useState(7);
   const [autoRefresh, setAutoRefresh] = useState(false);
 
@@ -92,11 +97,23 @@ const AnalyticsDashboard: React.FC = () => {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
-          <p className="text-gray-600">
-            Smart Autocomplete Search System Performance Metrics
-          </p>
+        <div className="flex items-center space-x-4">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Back to Search"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="font-medium">Back</span>
+            </button>
+          )}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
+            <p className="text-gray-600">
+              Smart Autocomplete Search System Performance Metrics
+            </p>
+          </div>
           {lastUpdated && (
             <p className="text-sm text-gray-500 mt-1">
               Last updated: {lastUpdated.toLocaleString()}

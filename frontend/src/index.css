@@ -6,56 +6,404 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Dark theme color palette */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #2a2a2a;
+    --bg-card: #1e1e1e;
+    --bg-hover: #2d2d2d;
+
+    /* Golden accent colors */
+    --accent-primary: #fbbf24;
+    --accent-secondary: #f59e0b;
+    --accent-tertiary: #d97706;
+    --accent-glow: rgba(251, 191, 36, 0.3);
+
+    /* Text colors */
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-tertiary: #9ca3af;
+    --text-accent: #fbbf24;
+
+    /* Border colors */
+    --border-primary: #374151;
+    --border-secondary: #4b5563;
+    --border-accent: #fbbf24;
+
+    /* Shadow colors */
+    --shadow-primary: rgba(0, 0, 0, 0.5);
+    --shadow-accent: rgba(251, 191, 36, 0.2);
+    --shadow-glow: rgba(251, 191, 36, 0.4);
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply text-gray-100;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     font-family: 'Inter', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Animated background particles */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(circle at 20% 80%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(251, 191, 36, 0.03) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
   }
 
   html {
     scroll-behavior: smooth;
   }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--accent-primary);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-secondary);
+  }
 }
 
 @layer components {
-  /* Custom component styles */
+  /* Dark theme component styles */
   .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    @apply text-gray-900 font-medium py-3 px-6 rounded-lg transition-all duration-300 focus:outline-none;
+    box-shadow: 0 4px 15px var(--shadow-accent), 0 0 20px rgba(251, 191, 36, 0.1);
+    transform: translateY(0);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--shadow-accent), 0 0 30px rgba(251, 191, 36, 0.2);
+  }
+
+  .btn-primary:hover::before {
+    left: 100%;
   }
 
   .btn-secondary {
-    @apply bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    @apply text-gray-300 font-medium py-3 px-6 rounded-lg transition-all duration-300 focus:outline-none;
+    box-shadow: 0 2px 10px var(--shadow-primary);
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-primary);
+    @apply text-gray-100;
+    box-shadow: 0 4px 15px var(--shadow-primary), 0 0 15px rgba(251, 191, 36, 0.1);
   }
 
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+    @apply w-full px-4 py-3 rounded-lg text-gray-100 placeholder-gray-400 transition-all duration-300;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .input-field:focus {
+    border-color: var(--accent-primary);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.3),
+      0 0 0 3px rgba(251, 191, 36, 0.1),
+      0 0 20px rgba(251, 191, 36, 0.1);
+    outline: none;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-lg border border-gray-100 p-6;
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+    @apply rounded-xl p-6 transition-all duration-300;
+    box-shadow:
+      0 10px 25px var(--shadow-primary),
+      0 0 0 1px rgba(251, 191, 36, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+    opacity: 0.5;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+      0 20px 40px var(--shadow-primary),
+      0 0 0 1px rgba(251, 191, 36, 0.2),
+      0 0 30px rgba(251, 191, 36, 0.1);
   }
 
   .suggestion-item {
-    @apply px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150 border-b border-gray-100 last:border-b-0;
+    background: transparent;
+    border-bottom: 1px solid var(--border-primary);
+    @apply px-4 py-3 cursor-pointer transition-all duration-200 text-gray-300;
+    position: relative;
+  }
+
+  .suggestion-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent-primary), transparent);
+    transition: width 0.3s ease;
+  }
+
+  .suggestion-item:hover {
+    background: var(--bg-hover);
+    @apply text-gray-100;
+    padding-left: 1.5rem;
+  }
+
+  .suggestion-item:hover::before {
+    width: 3px;
   }
 
   .suggestion-item.active {
-    @apply bg-blue-50 text-blue-900;
+    background: rgba(251, 191, 36, 0.1);
+    @apply text-yellow-300;
+    border-left: 3px solid var(--accent-primary);
+    padding-left: 1.5rem;
   }
 
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-all duration-200;
+    backdrop-filter: blur(10px);
   }
 
   .badge-primary {
-    @apply bg-blue-100 text-blue-800;
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    @apply text-yellow-300;
   }
 
   .badge-secondary {
-    @apply bg-gray-100 text-gray-800;
+    background: rgba(156, 163, 175, 0.2);
+    border: 1px solid rgba(156, 163, 175, 0.3);
+    @apply text-gray-300;
   }
 
   .badge-accent {
-    @apply bg-green-100 text-green-800;
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    @apply text-green-300;
+  }
+
+  /* Glowing text effect */
+  .glow-text {
+    color: var(--accent-primary);
+    text-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  /* Animated gradient text */
+  .gradient-text {
+    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary), var(--accent-primary));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease-in-out infinite;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    border: 2px solid var(--border-primary);
+    border-top: 2px solid var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  /* Floating animation for cards */
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Pulse animation for active elements */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  /* Shimmer effect for loading states */
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Typewriter effect */
+  .typewriter {
+    overflow: hidden;
+    border-right: 2px solid var(--accent-primary);
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+  }
+}
+
+@layer utilities {
+  /* Custom utility classes */
+  .bg-glass {
+    background: rgba(30, 30, 30, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(251, 191, 36, 0.1);
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .border-glow {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+  }
+
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Keyframe animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from, to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: var(--accent-primary);
+  }
+}
+
+/* Responsive design enhancements */
+@media (max-width: 768px) {
+  .card {
+    @apply p-4;
+  }
+
+  .btn-primary, .btn-secondary {
+    @apply py-2 px-4 text-sm;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --accent-primary: #ffcc00;
+    --text-primary: #ffffff;
+    --border-primary: #666666;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
