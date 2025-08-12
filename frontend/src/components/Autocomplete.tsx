@@ -10,7 +10,7 @@ import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import SuggestionItem from './SuggestionItem';
 import VoiceInput from './VoiceInput';
 import ImageOCRModal from './ImageOCRModal';
-import { AutocompleteProps, Suggestion } from '../types/index';
+import type { AutocompleteProps, Suggestion } from '../types/index';
 
 const Autocomplete: React.FC<AutocompleteProps> = ({
   placeholder = 'Start typing to search...',

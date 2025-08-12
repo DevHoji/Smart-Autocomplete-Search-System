@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiService } from '../services/api';
-import { AnalyticsData, UseAnalyticsReturn } from '../types/index';
+import type { AnalyticsData, UseAnalyticsReturn } from '../types/index';
 
 interface UseAnalyticsOptions {
   days?: number;

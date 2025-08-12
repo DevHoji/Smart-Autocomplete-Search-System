@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Hash, Tag, Users } from 'lucide-react';
-import { SuggestionItemProps } from '../types/index';
+import type { SuggestionItemProps } from '../types';
 
 const SuggestionItem: React.FC<SuggestionItemProps> = ({
   suggestion,

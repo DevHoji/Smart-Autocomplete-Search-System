@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Mic, Image, Settings, BarChart3, Download } from 'lucide-react';
 import { apiService } from './services/api';
-import { AnalyticsData, Suggestion } from './types/index';
+import type { AnalyticsData, Suggestion } from './types/index';
 import Autocomplete from './components/Autocomplete';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import ImageOCRModal from './components/ImageOCRModal';

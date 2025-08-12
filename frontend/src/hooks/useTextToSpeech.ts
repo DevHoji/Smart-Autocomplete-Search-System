@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { TTSState, UseTTSReturn } from '../types/index';
+import type { TTSState, UseTTSReturn } from '../types';
 
 interface UseTextToSpeechOptions {
   voice?: SpeechSynthesisVoice;

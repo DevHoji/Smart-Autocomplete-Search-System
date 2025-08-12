@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiService } from '../services/api';
-import { Suggestion, AutocompleteState, UseAutocompleteReturn } from '../types/index';
+import type { Suggestion, AutocompleteState, UseAutocompleteReturn } from '../types';
 
 interface UseAutocompleteOptions {
   debounceMs?: number;
