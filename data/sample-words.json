@@ -1,0 +1,380 @@
+[
+  {
+    "word": "hello",
+    "freq": 150,
+    "category": "greeting",
+    "synonyms": ["hi", "hey", "greetings"]
+  },
+  {
+    "word": "world",
+    "freq": 120,
+    "category": "noun",
+    "synonyms": ["earth", "globe", "planet"]
+  },
+  {
+    "word": "help",
+    "freq": 100,
+    "category": "action",
+    "synonyms": ["assist", "aid", "support"]
+  },
+  {
+    "word": "search",
+    "freq": 95,
+    "category": "action",
+    "synonyms": ["find", "look", "seek"]
+  },
+  {
+    "word": "computer",
+    "freq": 90,
+    "category": "technology",
+    "synonyms": ["pc", "machine", "device"]
+  },
+  {
+    "word": "programming",
+    "freq": 85,
+    "category": "technology",
+    "synonyms": ["coding", "development", "software"]
+  },
+  {
+    "word": "javascript",
+    "freq": 80,
+    "category": "technology",
+    "synonyms": ["js", "ecmascript"]
+  },
+  {
+    "word": "python",
+    "freq": 78,
+    "category": "technology",
+    "synonyms": ["py"]
+  },
+  {
+    "word": "typescript",
+    "freq": 75,
+    "category": "technology",
+    "synonyms": ["ts"]
+  },
+  {
+    "word": "react",
+    "freq": 70,
+    "category": "technology",
+    "synonyms": ["reactjs"]
+  },
+  {
+    "word": "node",
+    "freq": 68,
+    "category": "technology",
+    "synonyms": ["nodejs"]
+  },
+  {
+    "word": "database",
+    "freq": 65,
+    "category": "technology",
+    "synonyms": ["db", "data store"]
+  },
+  {
+    "word": "api",
+    "freq": 62,
+    "category": "technology",
+    "synonyms": ["interface", "endpoint"]
+  },
+  {
+    "word": "server",
+    "freq": 60,
+    "category": "technology",
+    "synonyms": ["backend", "host"]
+  },
+  {
+    "word": "client",
+    "freq": 58,
+    "category": "technology",
+    "synonyms": ["frontend", "user"]
+  },
+  {
+    "word": "algorithm",
+    "freq": 55,
+    "category": "technology",
+    "synonyms": ["algo", "procedure"]
+  },
+  {
+    "word": "data",
+    "freq": 52,
+    "category": "technology",
+    "synonyms": ["information", "content"]
+  },
+  {
+    "word": "function",
+    "freq": 50,
+    "category": "technology",
+    "synonyms": ["method", "procedure"]
+  },
+  {
+    "word": "variable",
+    "freq": 48,
+    "category": "technology",
+    "synonyms": ["var", "parameter"]
+  },
+  {
+    "word": "array",
+    "freq": 45,
+    "category": "technology",
+    "synonyms": ["list", "collection"]
+  },
+  {
+    "word": "object",
+    "freq": 43,
+    "category": "technology",
+    "synonyms": ["obj", "instance"]
+  },
+  {
+    "word": "string",
+    "freq": 40,
+    "category": "technology",
+    "synonyms": ["text", "str"]
+  },
+  {
+    "word": "number",
+    "freq": 38,
+    "category": "technology",
+    "synonyms": ["num", "integer"]
+  },
+  {
+    "word": "boolean",
+    "freq": 35,
+    "category": "technology",
+    "synonyms": ["bool", "true/false"]
+  },
+  {
+    "word": "error",
+    "freq": 33,
+    "category": "technology",
+    "synonyms": ["exception", "bug"]
+  },
+  {
+    "word": "debug",
+    "freq": 30,
+    "category": "technology",
+    "synonyms": ["troubleshoot", "fix"]
+  },
+  {
+    "word": "test",
+    "freq": 28,
+    "category": "technology",
+    "synonyms": ["testing", "check"]
+  },
+  {
+    "word": "code",
+    "freq": 25,
+    "category": "technology",
+    "synonyms": ["source", "script"]
+  },
+  {
+    "word": "file",
+    "freq": 23,
+    "category": "technology",
+    "synonyms": ["document", "data"]
+  },
+  {
+    "word": "folder",
+    "freq": 20,
+    "category": "technology",
+    "synonyms": ["directory", "path"]
+  },
+  {
+    "word": "user",
+    "freq": 45,
+    "category": "person",
+    "synonyms": ["person", "individual"]
+  },
+  {
+    "word": "admin",
+    "freq": 25,
+    "category": "person",
+    "synonyms": ["administrator", "manager"]
+  },
+  {
+    "word": "developer",
+    "freq": 40,
+    "category": "person",
+    "synonyms": ["programmer", "coder"]
+  },
+  {
+    "word": "designer",
+    "freq": 30,
+    "category": "person",
+    "synonyms": ["artist", "creator"]
+  },
+  {
+    "word": "manager",
+    "freq": 35,
+    "category": "person",
+    "synonyms": ["supervisor", "lead"]
+  },
+  {
+    "word": "team",
+    "freq": 42,
+    "category": "group",
+    "synonyms": ["group", "squad"]
+  },
+  {
+    "word": "project",
+    "freq": 48,
+    "category": "work",
+    "synonyms": ["task", "assignment"]
+  },
+  {
+    "word": "meeting",
+    "freq": 35,
+    "category": "work",
+    "synonyms": ["conference", "discussion"]
+  },
+  {
+    "word": "deadline",
+    "freq": 30,
+    "category": "work",
+    "synonyms": ["due date", "timeline"]
+  },
+  {
+    "word": "schedule",
+    "freq": 28,
+    "category": "work",
+    "synonyms": ["calendar", "timetable"]
+  },
+  {
+    "word": "email",
+    "freq": 55,
+    "category": "communication",
+    "synonyms": ["mail", "message"]
+  },
+  {
+    "word": "phone",
+    "freq": 40,
+    "category": "communication",
+    "synonyms": ["call", "telephone"]
+  },
+  {
+    "word": "chat",
+    "freq": 35,
+    "category": "communication",
+    "synonyms": ["message", "talk"]
+  },
+  {
+    "word": "video",
+    "freq": 38,
+    "category": "media",
+    "synonyms": ["clip", "recording"]
+  },
+  {
+    "word": "audio",
+    "freq": 32,
+    "category": "media",
+    "synonyms": ["sound", "music"]
+  },
+  {
+    "word": "image",
+    "freq": 45,
+    "category": "media",
+    "synonyms": ["picture", "photo"]
+  },
+  {
+    "word": "document",
+    "freq": 50,
+    "category": "media",
+    "synonyms": ["doc", "file"]
+  },
+  {
+    "word": "report",
+    "freq": 42,
+    "category": "media",
+    "synonyms": ["summary", "analysis"]
+  },
+  {
+    "word": "presentation",
+    "freq": 38,
+    "category": "media",
+    "synonyms": ["slides", "demo"]
+  },
+  {
+    "word": "website",
+    "freq": 60,
+    "category": "web",
+    "synonyms": ["site", "webpage"]
+  },
+  {
+    "word": "browser",
+    "freq": 45,
+    "category": "web",
+    "synonyms": ["web browser", "navigator"]
+  },
+  {
+    "word": "internet",
+    "freq": 55,
+    "category": "web",
+    "synonyms": ["web", "net"]
+  },
+  {
+    "word": "network",
+    "freq": 40,
+    "category": "web",
+    "synonyms": ["connection", "link"]
+  },
+  {
+    "word": "security",
+    "freq": 48,
+    "category": "web",
+    "synonyms": ["protection", "safety"]
+  },
+  {
+    "word": "password",
+    "freq": 35,
+    "category": "web",
+    "synonyms": ["pass", "credentials"]
+  },
+  {
+    "word": "login",
+    "freq": 42,
+    "category": "web",
+    "synonyms": ["signin", "authenticate"]
+  },
+  {
+    "word": "logout",
+    "freq": 25,
+    "category": "web",
+    "synonyms": ["signout", "exit"]
+  },
+  {
+    "word": "profile",
+    "freq": 38,
+    "category": "web",
+    "synonyms": ["account", "user info"]
+  },
+  {
+    "word": "settings",
+    "freq": 45,
+    "category": "web",
+    "synonyms": ["preferences", "config"]
+  },
+  {
+    "word": "dashboard",
+    "freq": 40,
+    "category": "web",
+    "synonyms": ["panel", "overview"]
+  },
+  {
+    "word": "analytics",
+    "freq": 35,
+    "category": "web",
+    "synonyms": ["stats", "metrics"]
+  },
+  {
+    "word": "performance",
+    "freq": 42,
+    "category": "web",
+    "synonyms": ["speed", "efficiency"]
+  },
+  {
+    "word": "optimization",
+    "freq": 30,
+    "category": "web",
+    "synonyms": ["improvement", "enhancement"]
+  }
+]

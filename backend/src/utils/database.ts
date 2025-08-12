@@ -3,7 +3,7 @@
  * Handles PostgreSQL connection using node-postgres (pg)
  */
 
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import { DatabaseConfig } from '@/types';
 
 class Database {
@@ -13,10 +13,11 @@ class Database {
   private constructor(config: DatabaseConfig) {
     this.pool = new Pool({
       connectionString: config.connectionString,
-      ssl: config.ssl ? { rejectUnauthorized: false } : false,
+      ssl: { rejectUnauthorized: false }, // Always use SSL for Neon
       max: 20, // Maximum number of clients in the pool
       idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-      connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+      connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
+      query_timeout: 30000, // Query timeout
     });
 
     // Handle pool errors
@@ -42,13 +43,13 @@ class Database {
   /**
    * Execute a query with parameters
    */
-  public async query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+  public async query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
     const start = Date.now();
     try {
       const result = await this.pool.query<T>(text, params);
       const duration = Date.now() - start;
       
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env['NODE_ENV'] === 'development') {
         console.log('Executed query', { text, duration, rows: result.rowCount });
       }
       
