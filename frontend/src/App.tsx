@@ -7,6 +7,7 @@ import KeyboardShortcuts from './components/KeyboardShortcuts';
 
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Settings from './components/Settings';
+import DownloadModal from './components/DownloadModal';
 import Settings from './components/Settings';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
   const [connectionError, setConnectionError] = useState<string>('');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   const [currentView, setCurrentView] = useState<'search' | 'analytics' | 'settings'>('search');
 
@@ -109,7 +111,11 @@ function App() {
               >
                 <BarChart3 className="w-5 h-5" />
               </button>
-              <button className="p-2 text-gray-400 hover:text-yellow-400 transition-all duration-300 hover:scale-110">
+              <button
+                onClick={() => setIsDownloadModalOpen(true)}
+                className="p-2 text-gray-400 hover:text-yellow-400 transition-all duration-300 hover:scale-110"
+                title="Export Data"
+              >
                 <Download className="w-5 h-5" />
               </button>
             </div>
@@ -295,6 +301,13 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Download Modal */}
+      <DownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => setIsDownloadModalOpen(false)}
+        analytics={analytics}
+      />
     </div>
   );
 }
