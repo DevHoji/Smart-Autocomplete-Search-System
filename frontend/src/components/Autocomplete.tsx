@@ -6,7 +6,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Search, Loader2, AlertCircle, X } from 'lucide-react';
 import { useAutocomplete } from '../hooks/useAutocomplete';
+import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import SuggestionItem from './SuggestionItem';
+import VoiceInput from './VoiceInput';
 import { AutocompleteProps, Suggestion } from '../types';
 
 const Autocomplete: React.FC<AutocompleteProps> = ({
@@ -20,17 +22,31 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [voiceInputUsed, setVoiceInputUsed] = useState(false);
 
   const { state, actions } = useAutocomplete({
     maxSuggestions,
     category,
     onSelect: (suggestion: Suggestion) => {
       setIsFocused(false);
+
+      // Speak the selected suggestion if voice was used or TTS is enabled
+      if (voiceInputUsed || tts.state.isEnabled) {
+        tts.actions.speak(`Selected: ${suggestion.word}`);
+      }
+
       if (onSelect) {
         onSelect(suggestion);
       }
     },
     onSearch,
+  });
+
+  // Text-to-Speech for suggestions
+  const tts = useTextToSpeech({
+    rate: 1.1,
+    pitch: 1,
+    volume: 0.8,
   });
 
   // Handle keyboard navigation
@@ -103,7 +119,30 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   // Clear input
   const handleClear = () => {
     actions.setQuery('');
+    setVoiceInputUsed(false);
     inputRef.current?.focus();
+  };
+
+  // Handle voice transcript
+  const handleVoiceTranscript = (transcript: string) => {
+    setVoiceInputUsed(true);
+    actions.setQuery(transcript);
+    inputRef.current?.focus();
+
+    // Speak confirmation
+    if (tts.state.isEnabled) {
+      tts.actions.speak(`Searching for: ${transcript}`);
+    }
+  };
+
+  // Handle voice error
+  const handleVoiceError = (error: string) => {
+    console.error('Voice input error:', error);
+
+    // Optionally speak the error
+    if (tts.state.isEnabled) {
+      tts.actions.speak('Voice input error occurred');
+    }
   };
 
   // Scroll selected suggestion into view
@@ -118,6 +157,22 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
       }
     }
   }, [state.selectedIndex]);
+
+  // Speak suggestions when voice input was used
+  useEffect(() => {
+    if (voiceInputUsed && state.suggestions.length > 0 && !state.isLoading && tts.state.isEnabled) {
+      const topSuggestions = state.suggestions.slice(0, 3).map(s => s.word);
+
+      if (topSuggestions.length === 1) {
+        tts.actions.speak(`Found: ${topSuggestions[0]}`);
+      } else {
+        tts.actions.speak(`Top suggestions: ${topSuggestions.join(', ')}`);
+      }
+
+      // Reset voice input flag after speaking
+      setTimeout(() => setVoiceInputUsed(false), 1000);
+    }
+  }, [state.suggestions, state.isLoading, voiceInputUsed, tts.state.isEnabled, tts.actions]);
 
   // Show dropdown when focused and has suggestions
   const showDropdown = isFocused && state.isOpen && state.suggestions.length > 0;
@@ -152,15 +207,21 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         />
 
         {/* Right side icons */}
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 space-x-1">
+          {/* Voice Input Component */}
+          <VoiceInput
+            onTranscript={handleVoiceTranscript}
+            onError={handleVoiceError}
+          />
+
           {state.isLoading && (
             <Loader2 className="h-5 w-5 text-primary-500 animate-spin" />
           )}
-          
+
           {state.error && (
             <AlertCircle className="h-5 w-5 text-red-500" />
           )}
-          
+
           {state.query && !state.isLoading && (
             <button
               onClick={handleClear}
