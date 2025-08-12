@@ -10,9 +10,11 @@ import {
   SelectResponse,
   InsertRequest,
   InsertResponse,
-  AnalyticsData,
   ApiError,
 } from '../types/index';
+
+// Import AnalyticsData separately to avoid module resolution issues
+import type { AnalyticsData } from '../types/index';
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';

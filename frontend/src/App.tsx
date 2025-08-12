@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Mic, Image, Settings, BarChart3, Download } from 'lucide-react';
 import { apiService } from './services/api';
-import { AnalyticsData, Suggestion } from './types';
+import { AnalyticsData, Suggestion } from './types/index';
 import Autocomplete from './components/Autocomplete';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import ImageOCRModal from './components/ImageOCRModal';
@@ -70,7 +70,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
                 <Search className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -103,7 +103,7 @@ function App() {
                 onClick={() => setCurrentView(currentView === 'search' ? 'analytics' : 'search')}
                 className={`p-2 transition-colors ${
                   currentView === 'analytics'
-                    ? 'text-primary-600 bg-primary-50'
+                    ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-400 hover:text-gray-600'
                 }`}
                 title={currentView === 'search' ? 'View Analytics' : 'Back to Search'}
@@ -137,7 +137,7 @@ function App() {
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="btn-primary"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Retry Connection
             </button>
@@ -176,25 +176,25 @@ function App() {
 
                 {/* Selected Suggestion Display */}
                 {selectedSuggestion && (
-                  <div className="mt-4 p-4 bg-primary-50 border border-primary-200 rounded-lg">
-                    <h4 className="font-medium text-primary-900 mb-2">Selected:</h4>
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">Selected:</h4>
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-lg font-semibold text-primary-800">
+                        <span className="text-lg font-semibold text-blue-800">
                           {selectedSuggestion.word}
                         </span>
                         {selectedSuggestion.category && (
-                          <span className="ml-2 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
+                          <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
                             {selectedSuggestion.category}
                           </span>
                         )}
                       </div>
-                      <span className="text-sm text-primary-600">
+                      <span className="text-sm text-blue-600">
                         Frequency: {selectedSuggestion.freq}
                       </span>
                     </div>
                     {selectedSuggestion.synonyms && selectedSuggestion.synonyms.length > 0 && (
-                      <div className="mt-2 text-sm text-primary-700">
+                      <div className="mt-2 text-sm text-blue-700">
                         <strong>Synonyms:</strong> {selectedSuggestion.synonyms.join(', ')}
                       </div>
                     )}
@@ -205,9 +205,9 @@ function App() {
 
             {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="card text-center">
-                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-6 h-6 text-primary-600" />
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-6 h-6 text-blue-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Fast Search
@@ -217,9 +217,9 @@ function App() {
                 </p>
               </div>
 
-              <div className="card text-center">
-                <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Mic className="w-6 h-6 text-accent-600" />
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Mic className="w-6 h-6 text-green-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Voice Input
@@ -229,9 +229,9 @@ function App() {
                 </p>
               </div>
 
-              <div className="card text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Image className="w-6 h-6 text-green-600" />
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Image className="w-6 h-6 text-orange-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Image OCR
@@ -241,7 +241,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="card text-center">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <BarChart3 className="w-6 h-6 text-purple-600" />
                 </div>
@@ -256,25 +256,25 @@ function App() {
 
             {/* Quick Stats */}
             {analytics && (
-              <div className="card">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   System Statistics
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-primary-600">
+                    <div className="text-2xl font-bold text-blue-600">
                       {analytics.trie_stats.word_count.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-600">Words</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-accent-600">
+                    <div className="text-2xl font-bold text-green-600">
                       {analytics.search_analytics.total_searches.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-600">Searches</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
+                    <div className="text-2xl font-bold text-emerald-600">
                       {analytics.search_analytics.success_rate.toFixed(1)}%
                     </div>
                     <div className="text-sm text-gray-600">Success Rate</div>
