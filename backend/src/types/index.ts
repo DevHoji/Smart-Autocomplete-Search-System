@@ -19,17 +19,17 @@ export interface Word {
 export interface TrieNode {
   children: Map<string, TrieNode>;
   isEndOfWord: boolean;
-  word?: string;
+  word?: string | undefined;
   freq: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> | undefined;
 }
 
 export interface TrieSuggestion {
   word: string;
   freq: number;
-  category?: string;
-  synonyms?: string[];
-  metadata?: Record<string, any>;
+  category?: string | undefined;
+  synonyms?: string[] | undefined;
+  metadata?: Record<string, any> | undefined;
 }
 
 // API request/response types
