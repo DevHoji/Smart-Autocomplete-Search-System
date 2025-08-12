@@ -4,7 +4,7 @@ import { apiService } from './services/api';
 import type { AnalyticsData, Suggestion } from './types/index';
 import Autocomplete from './components/Autocomplete';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
-import ImageOCRModal from './components/ImageOCRModal';
+
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
   const [connectionError, setConnectionError] = useState<string>('');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
-  const [isImageOCROpen, setIsImageOCROpen] = useState(false);
+
   const [currentView, setCurrentView] = useState<'search' | 'analytics'>('search');
 
   useEffect(() => {
@@ -50,18 +50,7 @@ function App() {
     console.log('Search query:', query);
   };
 
-  // Handle OCR text extraction
-  const handleOCRTextExtracted = (text: string) => {
-    console.log('OCR extracted text:', text);
-    // Set the extracted text as the search query
-    // This will be handled by the Autocomplete component
-  };
 
-  // Handle OCR error
-  const handleOCRError = (error: string) => {
-    console.error('OCR error:', error);
-    // Could show a toast notification here
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">

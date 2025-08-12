@@ -74,7 +74,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
   };
 
   const getMicButtonClass = () => {
-    let baseClass = 'p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
+    const baseClass = 'p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
     
     if (!voiceInput.state.isSupported) {
       return `${baseClass} text-gray-300 cursor-not-allowed bg-gray-100`;
@@ -92,7 +92,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
   };
 
   const getTTSButtonClass = () => {
-    let baseClass = 'p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
+    const baseClass = 'p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
     
     if (!tts.state.isSupported) {
       return `${baseClass} text-gray-300 cursor-not-allowed bg-gray-100`;
@@ -176,7 +176,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
       )}
 
       {/* Transcript display (for debugging) */}
-      {voiceInput.state.transcript && process.env.NODE_ENV === 'development' && (
+      {voiceInput.state.transcript && import.meta.env.DEV && (
         <div className="text-xs text-gray-500 max-w-xs truncate">
           "{voiceInput.state.transcript}"
           {voiceInput.state.confidence > 0 && (

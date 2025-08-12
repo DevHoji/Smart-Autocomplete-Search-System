@@ -38,13 +38,13 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceRetur
   });
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   // Check browser support
   useEffect(() => {
-    const SpeechRecognition = 
-      window.SpeechRecognition || 
-      (window as any).webkitSpeechRecognition;
+    const SpeechRecognition: typeof window.SpeechRecognition =
+      window.SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition: typeof window.SpeechRecognition }).webkitSpeechRecognition;
 
     const isSupported = !!SpeechRecognition;
     
@@ -200,7 +200,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceRetur
         stopListening();
       }, 30000);
 
-    } catch (error) {
+    } catch {
       const errorMessage = 'Failed to start speech recognition';
       setState(prev => ({
         ...prev,

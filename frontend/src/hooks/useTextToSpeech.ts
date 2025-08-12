@@ -153,7 +153,7 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}): UseTTSRet
       // Start speaking
       speechSynthesis.speak(utterance);
 
-    } catch (error) {
+    } catch {
       const errorMessage = 'Failed to start text-to-speech';
       setState(prev => ({
         ...prev,

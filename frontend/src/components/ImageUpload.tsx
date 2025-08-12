@@ -4,9 +4,9 @@
  */
 
 import React, { useRef, useState } from 'react';
-import { Image, Upload, X, Loader2, FileText, Camera, AlertCircle } from 'lucide-react';
+import { Upload, X, Loader2, FileText, Camera, AlertCircle } from 'lucide-react';
 import { useImageOCR } from '../hooks/useImageOCR';
-import { ImageUploadProps } from '../types/index';
+import type { ImageUploadProps } from '../types/index';
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
   onTextExtracted,
@@ -20,7 +20,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const { state: ocrState, actions: ocrActions } = useImageOCR({
     language: 'eng',
-    onTextExtracted: (text, confidence) => {
+    onTextExtracted: (text, _confidence) => {
       if (text.trim() && onTextExtracted) {
         onTextExtracted(text.trim());
       }

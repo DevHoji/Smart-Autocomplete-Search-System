@@ -35,7 +35,7 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
     error: undefined,
   });
 
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimeoutRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Debounced search function
@@ -101,13 +101,13 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
             onSearch(query);
           }
 
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Don't update state if request was aborted
-          if (error.name === 'AbortError' || abortControllerRef.current?.signal.aborted) {
+          if ((error as Error)?.name === 'AbortError' || abortControllerRef.current?.signal.aborted) {
             return;
           }
 
-          const errorMessage = error.message || 'Failed to fetch suggestions';
+          const errorMessage = (error as Error)?.message || 'Failed to fetch suggestions';
           
           setState(prev => ({
             ...prev,
@@ -161,8 +161,8 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
         onSelect(suggestion);
       }
 
-    } catch (error: any) {
-      const errorMessage = error.message || 'Failed to record selection';
+    } catch (error: unknown) {
+      const errorMessage = (error as Error)?.message || 'Failed to record selection';
       
       setState(prev => ({
         ...prev,

@@ -4,8 +4,8 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { createWorker, Worker } from 'tesseract.js';
-import { OCRState } from '../types/index';
+import { createWorker, type Worker } from 'tesseract.js';
+import type { OCRState } from '../types/index';
 
 interface UseImageOCROptions {
   language?: string;
