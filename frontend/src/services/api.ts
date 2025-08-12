@@ -243,7 +243,7 @@ class ApiService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      await this.client.get('/health');
+      await this.client.get('/api/admin/health');
       return true;
     } catch (error) {
       console.error('API connection test failed:', error);
