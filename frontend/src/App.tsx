@@ -6,6 +6,8 @@ import Autocomplete from './components/Autocomplete';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import Settings from './components/Settings';
+import Settings from './components/Settings';
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
@@ -13,7 +15,7 @@ function App() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
 
-  const [currentView, setCurrentView] = useState<'search' | 'analytics'>('search');
+  const [currentView, setCurrentView] = useState<'search' | 'analytics' | 'settings'>('search');
 
   useEffect(() => {
     // Test API connection on startup
@@ -85,17 +87,25 @@ function App() {
 
               {/* Action Buttons */}
               <KeyboardShortcuts />
-              <button className="p-2 text-gray-400 hover:text-yellow-400 transition-all duration-300 hover:scale-110">
+              <button
+                onClick={() => setCurrentView('settings')}
+                className={`p-2 transition-all duration-300 hover:scale-110 ${
+                  currentView === 'settings'
+                    ? 'text-yellow-400 bg-yellow-400/10 border-glow'
+                    : 'text-gray-400 hover:text-yellow-400'
+                }`}
+                title="Settings"
+              >
                 <Settings className="w-5 h-5" />
               </button>
               <button
-                onClick={() => setCurrentView(currentView === 'search' ? 'analytics' : 'search')}
+                onClick={() => setCurrentView(currentView === 'analytics' ? 'search' : 'analytics')}
                 className={`p-2 transition-all duration-300 hover:scale-110 ${
                   currentView === 'analytics'
                     ? 'text-yellow-400 bg-yellow-400/10 border-glow'
                     : 'text-gray-400 hover:text-yellow-400'
                 }`}
-                title={currentView === 'search' ? 'View Analytics' : 'Back to Search'}
+                title={currentView === 'analytics' ? 'Back to Search' : 'View Analytics'}
               >
                 <BarChart3 className="w-5 h-5" />
               </button>
@@ -112,6 +122,9 @@ function App() {
         {currentView === 'analytics' ? (
           /* Analytics Dashboard */
           <AnalyticsDashboard onBack={() => setCurrentView('search')} />
+        ) : currentView === 'settings' ? (
+          /* Settings Page */
+          <Settings onBack={() => setCurrentView('search')} />
         ) : connectionError ? (
           /* Connection Error */
           <div className="text-center py-12">
