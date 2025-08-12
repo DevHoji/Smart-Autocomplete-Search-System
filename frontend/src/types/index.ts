@@ -8,7 +8,7 @@ export interface Suggestion {
   freq: number;
   category?: string;
   synonyms?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SuggestResponse {
@@ -37,7 +37,7 @@ export interface InsertRequest {
   freq?: number;
   category?: string;
   synonyms?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   user_id?: string;
 }
 
@@ -50,7 +50,7 @@ export interface InsertResponse {
     freq: number;
     category?: string;
     synonyms?: string[];
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   };
   timestamp: string;
 }
@@ -146,7 +146,7 @@ export interface SocketEvents {
   }) => void;
   'analytics:update': (data: {
     type: 'search' | 'selection';
-    data: any;
+    data: unknown;
   }) => void;
 }
 
@@ -189,10 +189,10 @@ export interface AnalyticsDashboardProps {
 export interface ApiError {
   message: string;
   code: string;
-  details?: any;
+  details?: unknown;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   error?: ApiError;
   timestamp: string;
