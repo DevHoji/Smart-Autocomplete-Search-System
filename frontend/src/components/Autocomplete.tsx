@@ -207,7 +207,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-gray-400" />
         </div>
-        
+
         <input
           ref={inputRef}
           type="text"
@@ -217,12 +217,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           placeholder={placeholder}
-          className={`
-            w-full pl-10 pr-12 py-3 text-lg border border-gray-300 rounded-xl
-            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-            transition-all duration-200 shadow-sm
-            ${state.error ? 'border-red-300 focus:ring-red-500' : ''}
-          `}
+          className={`input-field text-lg ${state.error ? 'border-red-500 focus:border-red-500' : ''}`}
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
           aria-autocomplete="list"
@@ -240,7 +235,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
           {/* Image OCR Button */}
           <button
             onClick={() => setIsImageOCROpen(true)}
-            className="p-2 text-gray-400 hover:text-primary-600 transition-colors rounded-lg hover:bg-primary-50"
+            className="p-2 text-gray-400 hover:text-yellow-400 transition-all duration-300 rounded-lg hover:scale-110"
             aria-label="Extract text from image"
             title="Upload image to extract text"
           >
@@ -248,17 +243,17 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
           </button>
 
           {state.isLoading && (
-            <Loader2 className="h-5 w-5 text-primary-500 animate-spin" />
+            <Loader2 className="h-5 w-5 text-yellow-400 animate-spin" />
           )}
 
           {state.error && (
-            <AlertCircle className="h-5 w-5 text-red-500" />
+            <AlertCircle className="h-5 w-5 text-red-400" />
           )}
 
           {state.query && !state.isLoading && (
             <button
               onClick={handleClear}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1 text-gray-400 hover:text-red-400 transition-all duration-300 hover:scale-110"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />
@@ -269,7 +264,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
       {/* Error Message */}
       {state.error && (
-        <div className="mt-2 text-sm text-red-600 flex items-center">
+        <div className="mt-2 text-sm text-red-400 flex items-center">
           <AlertCircle className="h-4 w-4 mr-1" />
           {state.error}
         </div>
@@ -279,7 +274,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
       {showDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-96 overflow-y-auto"
+          className="absolute z-50 w-full mt-2 card max-h-96 overflow-y-auto border-glow"
           role="listbox"
         >
           {state.suggestions.map((suggestion, index) => (
@@ -293,11 +288,11 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
           ))}
           
           {/* Footer with suggestion count */}
-          <div className="px-4 py-2 border-t border-gray-100 bg-gray-50 text-xs text-gray-500 rounded-b-xl">
+          <div className="px-4 py-2 border-t border-gray-700 bg-gray-800/50 text-xs text-gray-400 rounded-b-xl">
             {state.suggestions.length} suggestion{state.suggestions.length !== 1 ? 's' : ''} found
             {category && (
               <span className="ml-2">
-                • Filtered by: <span className="font-medium capitalize">{category}</span>
+                • Filtered by: <span className="font-medium capitalize text-yellow-400">{category}</span>
               </span>
             )}
           </div>
@@ -306,17 +301,17 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
       {/* Loading state for empty results */}
       {state.isLoading && state.query && !state.suggestions.length && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center">
-          <Loader2 className="h-6 w-6 text-primary-500 animate-spin mx-auto mb-2" />
-          <p className="text-sm text-gray-600">Searching for "{state.query}"...</p>
+        <div className="absolute z-50 w-full mt-2 card text-center">
+          <Loader2 className="h-6 w-6 text-yellow-400 animate-spin mx-auto mb-2" />
+          <p className="text-sm text-gray-300">Searching for "<span className="text-yellow-400">{state.query}</span>"...</p>
         </div>
       )}
 
       {/* No results state */}
       {!state.isLoading && state.query && state.suggestions.length === 0 && isFocused && !state.error && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center">
+        <div className="absolute z-50 w-full mt-2 card text-center">
           <Search className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">No suggestions found for "{state.query}"</p>
+          <p className="text-sm text-gray-300">No suggestions found for "<span className="text-yellow-400">{state.query}</span>"</p>
           <p className="text-xs text-gray-500 mt-1">Try a different search term or check your spelling</p>
         </div>
       )}
