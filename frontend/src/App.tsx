@@ -4,12 +4,14 @@ import { apiService } from './services/api';
 import { AnalyticsData, Suggestion } from './types';
 import Autocomplete from './components/Autocomplete';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
+import ImageOCRModal from './components/ImageOCRModal';
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string>('');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
+  const [isImageOCROpen, setIsImageOCROpen] = useState(false);
 
   useEffect(() => {
     // Test API connection on startup
@@ -44,6 +46,19 @@ function App() {
   // Handle search
   const handleSearch = (query: string) => {
     console.log('Search query:', query);
+  };
+
+  // Handle OCR text extraction
+  const handleOCRTextExtracted = (text: string) => {
+    console.log('OCR extracted text:', text);
+    // Set the extracted text as the search query
+    // This will be handled by the Autocomplete component
+  };
+
+  // Handle OCR error
+  const handleOCRError = (error: string) => {
+    console.error('OCR error:', error);
+    // Could show a toast notification here
   };
 
   return (

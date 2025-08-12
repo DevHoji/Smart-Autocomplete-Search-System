@@ -4,11 +4,12 @@
  */
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Search, Loader2, AlertCircle, X } from 'lucide-react';
+import { Search, Loader2, AlertCircle, X, Image } from 'lucide-react';
 import { useAutocomplete } from '../hooks/useAutocomplete';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import SuggestionItem from './SuggestionItem';
 import VoiceInput from './VoiceInput';
+import ImageOCRModal from './ImageOCRModal';
 import { AutocompleteProps, Suggestion } from '../types';
 
 const Autocomplete: React.FC<AutocompleteProps> = ({
@@ -23,6 +24,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [voiceInputUsed, setVoiceInputUsed] = useState(false);
+  const [isImageOCROpen, setIsImageOCROpen] = useState(false);
 
   const { state, actions } = useAutocomplete({
     maxSuggestions,
@@ -145,6 +147,27 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     }
   };
 
+  // Handle OCR text extraction
+  const handleOCRTextExtracted = (text: string) => {
+    actions.setQuery(text);
+    inputRef.current?.focus();
+
+    // Speak confirmation
+    if (tts.state.isEnabled) {
+      tts.actions.speak(`Text extracted: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}`);
+    }
+  };
+
+  // Handle OCR error
+  const handleOCRError = (error: string) => {
+    console.error('OCR error:', error);
+
+    // Optionally speak the error
+    if (tts.state.isEnabled) {
+      tts.actions.speak('Image text extraction failed');
+    }
+  };
+
   // Scroll selected suggestion into view
   useEffect(() => {
     if (state.selectedIndex >= 0 && dropdownRef.current) {
@@ -213,6 +236,16 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
             onTranscript={handleVoiceTranscript}
             onError={handleVoiceError}
           />
+
+          {/* Image OCR Button */}
+          <button
+            onClick={() => setIsImageOCROpen(true)}
+            className="p-2 text-gray-400 hover:text-primary-600 transition-colors rounded-lg hover:bg-primary-50"
+            aria-label="Extract text from image"
+            title="Upload image to extract text"
+          >
+            <Image className="w-5 h-5" />
+          </button>
 
           {state.isLoading && (
             <Loader2 className="h-5 w-5 text-primary-500 animate-spin" />
@@ -287,6 +320,14 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
           <p className="text-xs text-gray-500 mt-1">Try a different search term or check your spelling</p>
         </div>
       )}
+
+      {/* Image OCR Modal */}
+      <ImageOCRModal
+        isOpen={isImageOCROpen}
+        onClose={() => setIsImageOCROpen(false)}
+        onTextExtracted={handleOCRTextExtracted}
+        onError={handleOCRError}
+      />
     </div>
   );
 };
