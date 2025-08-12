@@ -38,7 +38,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceRetur
   });
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check browser support
   useEffect(() => {

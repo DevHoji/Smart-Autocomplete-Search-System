@@ -251,11 +251,24 @@ export interface UseTTSReturn {
     stop: () => void;
     toggle: () => void;
   };
+  utils: {
+    changeVoice: (voiceIndex: number) => void;
+    getVoices: () => SpeechSynthesisVoice[];
+    getCurrentVoice: () => SpeechSynthesisVoice | null;
+    speakSuggestions: (suggestions: Array<{ word: string }>) => void;
+  };
 }
 
 export interface UseAnalyticsReturn {
   data?: AnalyticsData;
   isLoading: boolean;
   error?: string;
+  lastUpdated?: Date;
+  derivedMetrics?: {
+    totalActivity: number;
+    averageWordsPerSearch: number;
+    popularityTrend: number;
+    engagementScore: number;
+  } | null;
   refetch: () => Promise<void>;
 }

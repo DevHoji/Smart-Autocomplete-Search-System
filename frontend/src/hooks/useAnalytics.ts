@@ -27,8 +27,8 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
   const [error, setError] = useState<string | undefined>(undefined);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const intervalRef = useRef<NodeJS.Timeout>();
-  const abortControllerRef = useRef<AbortController>();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Fetch analytics data
   const fetchAnalytics = useCallback(async (showLoading = true) => {
