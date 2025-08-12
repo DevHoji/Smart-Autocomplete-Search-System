@@ -5,6 +5,7 @@ import { AnalyticsData, Suggestion } from './types';
 import Autocomplete from './components/Autocomplete';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import ImageOCRModal from './components/ImageOCRModal';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
@@ -12,6 +13,7 @@ function App() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [isImageOCROpen, setIsImageOCROpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'search' | 'analytics'>('search');
 
   useEffect(() => {
     // Test API connection on startup
@@ -97,7 +99,15 @@ function App() {
               <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <Settings className="w-5 h-5" />
               </button>
-              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+              <button
+                onClick={() => setCurrentView(currentView === 'search' ? 'analytics' : 'search')}
+                className={`p-2 transition-colors ${
+                  currentView === 'analytics'
+                    ? 'text-primary-600 bg-primary-50'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+                title={currentView === 'search' ? 'View Analytics' : 'Back to Search'}
+              >
                 <BarChart3 className="w-5 h-5" />
               </button>
               <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
@@ -110,7 +120,10 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {connectionError ? (
+        {currentView === 'analytics' ? (
+          /* Analytics Dashboard */
+          <AnalyticsDashboard />
+        ) : connectionError ? (
           /* Connection Error */
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
