@@ -57,6 +57,7 @@ async function createTables() {
         result_count INTEGER NOT NULL DEFAULT 0,
         selected_word_id INTEGER REFERENCES words(id),
         response_time_ms INTEGER,
+        search_type VARCHAR(20) DEFAULT 'exact',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
@@ -67,6 +68,7 @@ async function createTables() {
       CREATE INDEX IF NOT EXISTS idx_search_logs_user_id ON search_logs(user_id);
       CREATE INDEX IF NOT EXISTS idx_search_logs_created_at ON search_logs(created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_search_logs_selected_word_id ON search_logs(selected_word_id);
+      CREATE INDEX IF NOT EXISTS idx_search_logs_search_type ON search_logs(search_type);
     `);
 
     // Create trigger to update updated_at timestamp

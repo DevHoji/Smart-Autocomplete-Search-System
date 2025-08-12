@@ -13,14 +13,17 @@ import { Trie } from '@/models/Trie';
 import { getDatabase } from '@/utils/database';
 import { Word, TrieSuggestion, SearchLog, AnalyticsStats } from '@/types';
 import { Server as SocketIOServer } from 'socket.io';
+import { FuzzyService } from './fuzzyService';
 
 export class TrieService {
   private static instance: TrieService;
   private trie: Trie;
   private io?: SocketIOServer;
+  private fuzzyService: FuzzyService;
 
   private constructor() {
     this.trie = new Trie();
+    this.fuzzyService = FuzzyService.getInstance();
   }
 
   /**
@@ -38,6 +41,8 @@ export class TrieService {
    */
   public initialize(io: SocketIOServer): void {
     this.io = io;
+    // Initialize FuzzyService with this TrieService instance
+    this.fuzzyService.initialize(this);
   }
 
   /**
@@ -66,7 +71,10 @@ export class TrieService {
 
       const stats = this.trie.getStats();
       console.log(`Trie loaded successfully:`, stats);
-      
+
+      // Update fuzzy search cache after Trie is loaded
+      this.fuzzyService.refreshCache();
+
     } catch (error) {
       console.error('Failed to load words from database:', error);
       throw error;
@@ -74,11 +82,11 @@ export class TrieService {
   }
 
   /**
-   * Get autocomplete suggestions for a prefix
+   * Get autocomplete suggestions for a prefix with fuzzy fallback
    */
   public async getSuggestions(
-    prefix: string, 
-    k: number = 10, 
+    prefix: string,
+    k: number = 10,
     category?: string,
     userId?: string
   ): Promise<{
@@ -88,22 +96,38 @@ export class TrieService {
     fuzzy: boolean;
   }> {
     const startTime = Date.now();
-    
+
     try {
-      // Get suggestions from Trie
-      const suggestions = this.trie.topK(prefix, k, category);
+      // First try exact prefix matching
+      const exactSuggestions = this.trie.topK(prefix, k, category);
+
+      // If we have enough exact matches, return them
+      if (exactSuggestions.length >= k || !this.fuzzyService.shouldUseFuzzySearch(prefix, exactSuggestions.length)) {
+        const responseTime = Date.now() - startTime;
+        await this.logSearch(prefix, exactSuggestions.length, responseTime, userId);
+
+        return {
+          suggestions: exactSuggestions,
+          prefix,
+          total: exactSuggestions.length,
+          fuzzy: false,
+        };
+      }
+
+      // Use hybrid approach: combine exact and fuzzy matches
+      const hybridResult = await this.fuzzyService.getHybridSuggestions(prefix, k, category);
       const responseTime = Date.now() - startTime;
 
       // Log the search for analytics
-      await this.logSearch(prefix, suggestions.length, responseTime, userId);
+      await this.logSearch(prefix, hybridResult.suggestions.length, responseTime, userId, hybridResult.fuzzy);
 
       return {
-        suggestions,
+        suggestions: hybridResult.suggestions,
         prefix,
-        total: suggestions.length,
-        fuzzy: false,
+        total: hybridResult.suggestions.length,
+        fuzzy: hybridResult.fuzzy,
       };
-      
+
     } catch (error) {
       console.error('Error getting suggestions:', error);
       throw error;
@@ -211,6 +235,20 @@ export class TrieService {
   }
 
   /**
+   * Get all words from Trie (used by FuzzyService)
+   */
+  public getAllWords(): TrieSuggestion[] {
+    return this.trie.getAllWords();
+  }
+
+  /**
+   * Get direct suggestions from Trie without fuzzy fallback (used by FuzzyService)
+   */
+  public getDirectSuggestions(prefix: string, k: number = 10, category?: string): TrieSuggestion[] {
+    return this.trie.topK(prefix, k, category);
+  }
+
+  /**
    * Get analytics data
    */
   public async getAnalytics(days: number = 7): Promise<AnalyticsStats> {
@@ -303,20 +341,23 @@ export class TrieService {
    * Log search query for analytics
    */
   private async logSearch(
-    query: string, 
-    resultCount: number, 
+    query: string,
+    resultCount: number,
     responseTime: number,
     userId?: string,
-    type: string = 'search'
+    fuzzy: boolean | string = false
   ): Promise<void> {
     const db = getDatabase();
-    
+
     try {
+      // Convert fuzzy parameter to appropriate type
+      const searchType = typeof fuzzy === 'string' ? fuzzy : (fuzzy ? 'fuzzy' : 'exact');
+
       await db.query(`
-        INSERT INTO search_logs (query_text, user_id, result_count, response_time_ms, created_at)
-        VALUES ($1, $2, $3, $4, NOW())
-      `, [query, userId, resultCount, responseTime]);
-      
+        INSERT INTO search_logs (query_text, user_id, result_count, response_time_ms, search_type, created_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+      `, [query, userId, resultCount, responseTime, searchType]);
+
     } catch (error) {
       // Don't throw on logging errors, just log them
       console.error('Failed to log search:', error);
