@@ -271,6 +271,25 @@ export class Trie {
   }
 
   /**
+   * Get the frequency of a specific word
+   * @param word - The word to get frequency for
+   * @returns The frequency of the word, or 0 if not found
+   */
+  public getWordFrequency(word: string): number {
+    let current = this.root;
+
+    for (const char of word.toLowerCase()) {
+      const child = current.children.get(char);
+      if (!child) {
+        return 0;
+      }
+      current = child;
+    }
+
+    return current.isEndOfWord ? (current.frequency || 0) : 0;
+  }
+
+  /**
    * Get Trie statistics
    *
    * @returns Object containing Trie statistics

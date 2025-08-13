@@ -71,14 +71,14 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
           <div className="flex items-center space-x-3">
-            <BarChart3 className="w-6 h-6 text-red-600" />
+            <BarChart3 className="w-6 h-6 text-red-400" />
             <div>
-              <h3 className="text-lg font-semibold text-red-900">
+              <h3 className="text-lg font-semibold text-red-300">
                 Analytics Error
               </h3>
-              <p className="text-red-700">{error}</p>
+              <p className="text-red-200">{error}</p>
               <button
                 onClick={handleRefresh}
                 className="mt-2 btn-primary"
@@ -101,7 +101,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
           {onBack && (
             <button
               onClick={onBack}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10 rounded-lg transition-all duration-300"
               title="Back to Search"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -109,13 +109,13 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
             </button>
           )}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
-            <p className="text-gray-600">
+            <h2 className="text-2xl font-bold gradient-text">Analytics Dashboard</h2>
+            <p className="text-gray-300">
               Smart Autocomplete Search System Performance Metrics
             </p>
           </div>
           {lastUpdated && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-400 mt-1">
               Last updated: {lastUpdated.toLocaleString()}
             </p>
           )}
@@ -124,11 +124,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
         <div className="flex items-center space-x-3">
           {/* Period Selector */}
           <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-gray-500" />
+            <Calendar className="w-4 h-4 text-gray-400" />
             <select
               value={selectedPeriod}
               onChange={(e) => handlePeriodChange(Number(e.target.value))}
-              className="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="text-sm bg-gray-800 border border-gray-600 text-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50"
             >
               <option value={1}>Last 24 hours</option>
               <option value={7}>Last 7 days</option>
@@ -143,16 +143,16 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
               type="checkbox"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              className="rounded border-gray-600 bg-gray-800 text-yellow-400 focus:ring-yellow-400/50"
             />
-            <span className="text-gray-700">Auto-refresh</span>
+            <span className="text-gray-300">Auto-refresh</span>
           </label>
 
           {/* Action Buttons */}
           <button
             onClick={handleRefresh}
             disabled={isLoading}
-            className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-yellow-400 transition-all duration-300 hover:scale-110"
             title="Refresh data"
           >
             <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -161,7 +161,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
           <button
             onClick={handleExport}
             disabled={!data}
-            className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-yellow-400 transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Export data"
           >
             <Download className="w-5 h-5" />
@@ -173,8 +173,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
         /* Loading State */
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <RefreshCw className="w-8 h-8 text-primary-500 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading analytics data...</p>
+            <RefreshCw className="w-8 h-8 text-yellow-400 animate-spin mx-auto mb-4" />
+            <p className="text-gray-300">Loading analytics data...</p>
           </div>
         </div>
       ) : data ? (
@@ -221,7 +221,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
             {/* Top Queries */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold gradient-text">
                   Top Search Queries
                 </h3>
                 <Filter className="w-5 h-5 text-gray-400" />
@@ -232,7 +232,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
             {/* Trending Words */}
             <div className="card">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold gradient-text">
                   Trending Words
                 </h3>
                 <TrendingUp className="w-5 h-5 text-gray-400" />
@@ -244,10 +244,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
           {/* Performance Chart */}
           <div className="card">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold gradient-text">
                 System Performance
               </h3>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <div className="flex items-center space-x-2 text-sm text-gray-400">
                 <span>Response Time & Success Rate</span>
               </div>
             </div>
@@ -262,42 +262,42 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Trie Statistics */}
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold gradient-text mb-4">
                 Trie Statistics
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Frequency</span>
-                  <span className="font-medium">
+                  <span className="text-gray-400">Total Frequency</span>
+                  <span className="font-medium text-gray-200">
                     {data.trie_stats.total_frequency.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Average Frequency</span>
-                  <span className="font-medium">
+                  <span className="text-gray-400">Average Frequency</span>
+                  <span className="font-medium text-gray-200">
                     {data.trie_stats.avg_frequency.toFixed(1)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Max Depth</span>
-                  <span className="font-medium">{data.trie_stats.max_depth}</span>
+                  <span className="text-gray-400">Max Depth</span>
+                  <span className="font-medium text-gray-200">{data.trie_stats.max_depth}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Node Count</span>
-                  <span className="font-medium">
+                  <span className="text-gray-400">Node Count</span>
+                  <span className="font-medium text-gray-200">
                     {data.trie_stats.node_count.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Memory Efficiency</span>
-                  <span className="font-medium">{data.performance.memory_efficiency}</span>
+                  <span className="text-gray-400">Memory Efficiency</span>
+                  <span className="font-medium text-gray-200">{data.performance.memory_efficiency}</span>
                 </div>
               </div>
             </div>
 
             {/* Top Words */}
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold gradient-text mb-4">
                 Most Popular Words
               </h3>
               <div className="space-y-2">
@@ -307,11 +307,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
                       <span className="text-xs text-gray-500 w-4">
                         #{index + 1}
                       </span>
-                      <span className="font-medium">{word.word}</span>
+                      <span className="font-medium text-gray-200">{word.word}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-sm">
-                      <span className="text-gray-600">{word.freq}</span>
-                      <span className="text-green-600">
+                      <span className="text-gray-400">{word.freq}</span>
+                      <span className="text-green-400">
                         {word.selections} selections
                       </span>
                     </div>
@@ -322,29 +322,29 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ onBack }) => {
 
             {/* Recent Activity */}
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold gradient-text mb-4">
                 System Health
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">System Status</span>
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span className="text-gray-400">System Status</span>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
                     Healthy
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Query Processing</span>
-                  <span className="font-medium text-green-600">
+                  <span className="text-gray-400">Query Processing</span>
+                  <span className="font-medium text-green-400">
                     {data.performance.query_time_ms}ms
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Data Freshness</span>
-                  <span className="font-medium">Real-time</span>
+                  <span className="text-gray-400">Data Freshness</span>
+                  <span className="font-medium text-gray-200">Real-time</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Uptime</span>
-                  <span className="font-medium text-green-600">99.9%</span>
+                  <span className="text-gray-400">Uptime</span>
+                  <span className="font-medium text-green-400">99.9%</span>
                 </div>
               </div>
             </div>

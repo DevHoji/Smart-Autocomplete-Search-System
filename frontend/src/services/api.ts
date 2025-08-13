@@ -13,6 +13,7 @@ import type {
   InsertRequest,
   InsertResponse,
   ApiError,
+  Suggestion,
 } from '../types';
 
 import type { AnalyticsData } from '../types';
@@ -77,7 +78,7 @@ class ApiService {
   private getUserId(): string {
     let userId = localStorage.getItem('autocomplete_user_id');
     if (!userId) {
-      userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
       localStorage.setItem('autocomplete_user_id', userId);
     }
     return userId;
@@ -181,6 +182,39 @@ class ApiService {
     failed: number;
   }> {
     const response = await this.client.post('/api/insert/batch', { words });
+    return response.data;
+  }
+
+  async getContextualSuggestions(
+    context: string,
+    currentWord: string,
+    maxSuggestions: number = 5
+  ): Promise<{ suggestions: Suggestion[] }> {
+    const response = await this.client.post<{ suggestions: Suggestion[] }>(
+      '/api/contextual-suggestions',
+      {
+        context,
+        currentWord,
+        maxSuggestions,
+      }
+    );
+    return response.data;
+  }
+
+  async checkSpelling(word: string): Promise<{ isCorrect: boolean }> {
+    const response = await this.client.get<{ isCorrect: boolean }>(
+      `/api/spell-check?word=${encodeURIComponent(word)}`
+    );
+    return response.data;
+  }
+
+  async getSpellSuggestions(
+    word: string,
+    maxSuggestions: number = 5
+  ): Promise<{ suggestions: string[] }> {
+    const response = await this.client.get<{ suggestions: string[] }>(
+      `/api/spell-suggestions?word=${encodeURIComponent(word)}&max=${maxSuggestions}`
+    );
     return response.data;
   }
 

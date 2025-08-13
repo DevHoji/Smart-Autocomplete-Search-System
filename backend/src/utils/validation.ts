@@ -8,11 +8,11 @@ import Joi from 'joi';
 // Suggest endpoint validation
 export const suggestQuerySchema = Joi.object({
   prefix: Joi.string()
-    .min(0)
+    .min(1)
     .max(100)
     .required()
     .messages({
-      'string.empty': 'Prefix cannot be empty',
+      'string.min': 'Prefix must be at least 1 character',
       'string.max': 'Prefix cannot exceed 100 characters',
       'any.required': 'Prefix is required'
     }),

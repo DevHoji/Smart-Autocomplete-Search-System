@@ -18,9 +18,11 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
     language: 'en-US',
     continuous: false,
     interimResults: true,
-    onTranscript: (transcript, confidence) => {
+    onTranscript: (transcript, _confidence) => {
       if (transcript.trim() && onTranscript) {
-        onTranscript(transcript.trim());
+        // Process the transcript to handle partial words and single letters
+        const processedTranscript = processVoiceTranscript(transcript.trim());
+        onTranscript(processedTranscript);
       }
     },
     onError: (error) => {
@@ -29,6 +31,150 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
       }
     },
   });
+
+  // Function to process voice transcript for better autocomplete
+  const processVoiceTranscript = (transcript: string): string => {
+    // Convert to lowercase for consistency
+    const processed = transcript.toLowerCase();
+
+    // Handle single letters - common voice recognition patterns
+    const singleLetterMap: Record<string, string> = {
+      'see': 'c',
+      'sea': 'c',
+      'bee': 'b',
+      'pee': 'p',
+      'tea': 't',
+      'you': 'u',
+      'why': 'y',
+      'are': 'r',
+      'oh': 'o',
+      'owe': 'o',
+      'eye': 'i',
+      'ay': 'a',
+      'eh': 'a',
+      'ex': 'x',
+      'kay': 'k',
+      'queue': 'q',
+      'cue': 'q',
+      'jay': 'j',
+      'em': 'm',
+      'en': 'n',
+      'eff': 'f',
+      'ell': 'l',
+      'ess': 's',
+      'zed': 'z',
+      'zee': 'z'
+    };
+
+    // Check if it's a single letter pronunciation
+    if (singleLetterMap[processed]) {
+      return singleLetterMap[processed];
+    }
+
+    // Handle common partial word patterns
+    const partialWordMap: Record<string, string> = {
+      'comp': 'computer',
+      'tech': 'technology',
+      'prog': 'programming',
+      'java': 'javascript',
+      'py': 'python',
+      'app': 'application',
+      'dev': 'development',
+      'web': 'website',
+      'net': 'internet',
+      'soft': 'software',
+      'data': 'database',
+      'algo': 'algorithm',
+      'func': 'function',
+      'var': 'variable',
+      'obj': 'object',
+      'arr': 'array',
+      'str': 'string',
+      'num': 'number',
+      'bool': 'boolean',
+      'int': 'integer',
+      'char': 'character',
+      'doc': 'document',
+      'elem': 'element',
+      'attr': 'attribute',
+      'prop': 'property',
+      'meth': 'method',
+      'class': 'class',
+      'mod': 'module',
+      'lib': 'library',
+      'frame': 'framework',
+      'serv': 'server',
+      'cli': 'client',
+      'api': 'api',
+      'rest': 'rest',
+      'json': 'json',
+      'xml': 'xml',
+      'html': 'html',
+      'css': 'css',
+      'js': 'javascript',
+      'ts': 'typescript',
+      'react': 'react',
+      'vue': 'vue',
+      'angular': 'angular',
+      'node': 'nodejs',
+      'npm': 'npm',
+      'git': 'git',
+      'github': 'github',
+      'sql': 'sql',
+      'db': 'database',
+      'ui': 'interface',
+      'ux': 'experience'
+    };
+
+    // Check if it matches a partial word pattern
+    for (const [partial, full] of Object.entries(partialWordMap)) {
+      if (processed === partial || processed.startsWith(partial + ' ')) {
+        return full;
+      }
+    }
+
+    // Handle phonetic variations and common misrecognitions
+    const phoneticMap: Record<string, string> = {
+      'see plus plus': 'c++',
+      'c plus plus': 'c++',
+      'see sharp': 'c#',
+      'c sharp': 'c#',
+      'dot net': '.net',
+      'dotnet': '.net',
+      'my sequel': 'mysql',
+      'my s q l': 'mysql',
+      'post gres': 'postgresql',
+      'postgres': 'postgresql',
+      'mongo d b': 'mongodb',
+      'mongo': 'mongodb',
+      'redis': 'redis',
+      'elastic search': 'elasticsearch',
+      'docker': 'docker',
+      'kubernetes': 'kubernetes',
+      'aws': 'aws',
+      'amazon web services': 'aws',
+      'google cloud': 'gcp',
+      'microsoft azure': 'azure',
+      'artificial intelligence': 'ai',
+      'machine learning': 'ml',
+      'deep learning': 'dl',
+      'neural network': 'neural',
+      'blockchain': 'blockchain',
+      'crypto currency': 'cryptocurrency',
+      'bit coin': 'bitcoin',
+      'ether eum': 'ethereum'
+    };
+
+    // Check phonetic variations
+    for (const [phonetic, correct] of Object.entries(phoneticMap)) {
+      if (processed === phonetic || processed.includes(phonetic)) {
+        return correct;
+      }
+    }
+
+    // Return the original transcript if no special processing is needed
+    return processed;
+  };
 
   const tts = useTextToSpeech({
     rate: 1.1,

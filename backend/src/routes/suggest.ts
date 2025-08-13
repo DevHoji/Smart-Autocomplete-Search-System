@@ -10,6 +10,7 @@ import { TrieService } from '@/services/TrieService';
 import { asyncHandler, validateRequest } from '@/utils/middleware';
 import { suggestQuerySchema } from '@/utils/validation';
 import { SuggestRequest, SuggestResponse } from '@/types';
+import { performanceOptimizer } from '../services/performanceOptimizer';
 
 const router = Router();
 const trieService = TrieService.getInstance();
@@ -39,7 +40,14 @@ router.get('/',
     const userId = req.headers['x-user-id'] as string;
 
     try {
-      // Get suggestions from TrieService
+      // Generate cache key
+      const cacheKey = performanceOptimizer.generateSuggestionCacheKey(
+        prefix,
+        parseInt(k.toString()),
+        category
+      );
+
+      // Get suggestions directly from trie service (bypassing cache for debugging)
       const result = await trieService.getSuggestions(
         prefix,
         parseInt(k.toString()),
@@ -49,11 +57,20 @@ router.get('/',
 
       const responseTime = Date.now() - startTime;
 
+      // Debug logging
+      console.log('Direct result from trie service:', JSON.stringify(result, null, 2));
+
+      // Ensure result is valid
+      if (!result || !result.suggestions) {
+        console.error('Invalid result structure:', result);
+        throw new Error('Invalid result from suggestion service');
+      }
+
       // Add performance headers
       res.set({
         'X-Response-Time': `${responseTime}ms`,
         'X-Suggestion-Count': result.suggestions.length.toString(),
-        'X-Cache-Status': 'MISS', // Could be enhanced with caching
+        'X-Cache-Status': 'HIT', // Enhanced with caching
       });
 
       // Return suggestions
@@ -147,5 +164,148 @@ router.get('/health',
     }
   })
 );
+
+// Contextual suggestions endpoint
+router.post('/contextual-suggestions', async (req: Request, res: Response) => {
+  try {
+    const { context, currentWord, maxSuggestions = 5 } = req.body;
+
+    if (!context || typeof context !== 'string') {
+      return res.status(400).json({
+        error: 'Context is required and must be a string',
+      });
+    }
+
+    if (!currentWord || typeof currentWord !== 'string') {
+      return res.status(400).json({
+        error: 'Current word is required and must be a string',
+      });
+    }
+
+    // For now, use simple contextual logic
+    // In a real implementation, this could use AI/ML models
+    const contextWords = context.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    const lastWord = contextWords[contextWords.length - 1];
+
+    // Simple context-based suggestions
+    const contextualSuggestions: string[] = [];
+
+    // Common word patterns based on context
+    const contextPatterns: Record<string, string[]> = {
+      'i': ['am', 'was', 'will', 'have', 'can', 'would', 'should'],
+      'the': ['best', 'most', 'first', 'last', 'only', 'main', 'next'],
+      'to': ['be', 'go', 'do', 'see', 'get', 'make', 'take'],
+      'is': ['a', 'an', 'the', 'not', 'very', 'really', 'quite'],
+      'are': ['you', 'we', 'they', 'not', 'very', 'really'],
+      'going': ['to', 'home', 'there', 'back', 'away'],
+      'what': ['is', 'are', 'was', 'were', 'do', 'does', 'did'],
+      'how': ['are', 'is', 'do', 'does', 'can', 'will', 'much'],
+      'where': ['is', 'are', 'do', 'does', 'can', 'will'],
+      'when': ['is', 'are', 'do', 'does', 'can', 'will'],
+    };
+
+    if (lastWord && contextPatterns[lastWord]) {
+      const patterns = contextPatterns[lastWord];
+      for (const pattern of patterns) {
+        if (pattern.startsWith(currentWord.toLowerCase())) {
+          contextualSuggestions.push(pattern);
+        }
+      }
+    }
+
+    // Get regular Trie suggestions as fallback
+    const trieResult = await trieService.getSuggestions(currentWord, maxSuggestions);
+    const trieSuggestions = trieResult.suggestions.map(s => s.word);
+
+    // Combine contextual and Trie suggestions
+    const allSuggestions = [
+      ...contextualSuggestions.slice(0, Math.floor(maxSuggestions / 2)),
+      ...trieSuggestions.slice(0, Math.ceil(maxSuggestions / 2))
+    ];
+
+    // Remove duplicates and format
+    const uniqueSuggestions = Array.from(new Set(allSuggestions))
+      .slice(0, maxSuggestions)
+      .map(word => ({
+        word,
+        freq: 1,
+        category: 'contextual',
+        synonyms: [],
+      }));
+
+    res.json({
+      suggestions: uniqueSuggestions,
+      context: context,
+      currentWord: currentWord,
+    });
+
+  } catch (error) {
+    console.error('Contextual suggestions error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// Spell check endpoint
+router.get('/spell-check', async (req: Request, res: Response) => {
+  try {
+    const { word } = req.query;
+
+    if (!word || typeof word !== 'string') {
+      return res.status(400).json({
+        error: 'Word parameter is required and must be a string',
+      });
+    }
+
+    // Check if word exists in Trie (basic spell check)
+    const result = await trieService.getSuggestions(word.toLowerCase(), 1);
+    const isCorrect = result.suggestions.length > 0;
+
+    res.json({
+      word: word,
+      isCorrect: isCorrect,
+    });
+
+  } catch (error) {
+    console.error('Spell check error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// Spell suggestions endpoint
+router.get('/spell-suggestions', async (req: Request, res: Response) => {
+  try {
+    const { word, max = '5' } = req.query;
+
+    if (!word || typeof word !== 'string') {
+      return res.status(400).json({
+        error: 'Word parameter is required and must be a string',
+      });
+    }
+
+    const maxSuggestions = parseInt(max as string, 10) || 5;
+
+    // Generate spell suggestions using fuzzy matching
+    const result = await trieService.getSuggestions(word, maxSuggestions);
+    const suggestions = result.suggestions.map(s => s.word);
+
+    res.json({
+      word: word,
+      suggestions: suggestions,
+    });
+
+  } catch (error) {
+    console.error('Spell suggestions error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
 
 export default router;

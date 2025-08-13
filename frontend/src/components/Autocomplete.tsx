@@ -112,10 +112,18 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
   // Handle suggestion selection
   const handleSuggestionSelect = (suggestion: Suggestion) => {
+    // Prevent blur from interfering
+    setIsFocused(false);
+
     const index = state.suggestions.findIndex(s => s.word === suggestion.word);
     if (index >= 0) {
       actions.selectSuggestion(index);
     }
+
+    // Focus back to input after selection
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
   };
 
   // Clear input
@@ -217,7 +225,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           placeholder={placeholder}
-          className={`input-field text-lg ${state.error ? 'border-red-500 focus:border-red-500' : ''}`}
+          className={`input-field text-lg pl-12 pr-24 ${state.error ? 'border-red-500 focus:border-red-500' : ''}`}
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
           aria-autocomplete="list"

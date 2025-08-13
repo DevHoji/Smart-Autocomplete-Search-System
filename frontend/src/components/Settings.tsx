@@ -14,104 +14,25 @@ import {
   RefreshCw,
   Save,
   Moon,
-  Sun,
   Palette,
   Zap,
   Shield,
   Bell,
   BellOff
 } from 'lucide-react';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface SettingsProps {
   onBack?: () => void;
 }
 
-interface SettingsState {
-  // Audio Settings
-  ttsEnabled: boolean;
-  voiceInputEnabled: boolean;
-  volume: number;
-  voiceSpeed: number;
-  
-  // Visual Settings
-  animationsEnabled: boolean;
-  reducedMotion: boolean;
-  highContrast: boolean;
-  fontSize: 'small' | 'medium' | 'large';
-  
-  // Search Settings
-  maxSuggestions: number;
-  autoComplete: boolean;
-  fuzzySearch: boolean;
-  searchDelay: number;
-  
-  // Privacy Settings
-  analyticsEnabled: boolean;
-  searchHistory: boolean;
-  notifications: boolean;
-  
-  // Performance Settings
-  cacheEnabled: boolean;
-  prefetchEnabled: boolean;
-}
-
 const Settings: React.FC<SettingsProps> = ({ onBack }) => {
-  const [settings, setSettings] = useState<SettingsState>({
-    // Audio Settings
-    ttsEnabled: true,
-    voiceInputEnabled: true,
-    volume: 70,
-    voiceSpeed: 1.0,
-    
-    // Visual Settings
-    animationsEnabled: true,
-    reducedMotion: false,
-    highContrast: false,
-    fontSize: 'medium',
-    
-    // Search Settings
-    maxSuggestions: 10,
-    autoComplete: true,
-    fuzzySearch: true,
-    searchDelay: 300,
-    
-    // Privacy Settings
-    analyticsEnabled: true,
-    searchHistory: true,
-    notifications: true,
-    
-    // Performance Settings
-    cacheEnabled: true,
-    prefetchEnabled: true,
-  });
-
+  const { settings, updateSetting, resetSettings: contextResetSettings } = useSettings();
   const [activeTab, setActiveTab] = useState<'general' | 'audio' | 'visual' | 'search' | 'privacy' | 'performance'>('general');
-
-  const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
 
   const resetSettings = () => {
     if (confirm('Are you sure you want to reset all settings to default?')) {
-      setSettings({
-        ttsEnabled: true,
-        voiceInputEnabled: true,
-        volume: 70,
-        voiceSpeed: 1.0,
-        animationsEnabled: true,
-        reducedMotion: false,
-        highContrast: false,
-        fontSize: 'medium',
-        maxSuggestions: 10,
-        autoComplete: true,
-        fuzzySearch: true,
-        searchDelay: 300,
-        analyticsEnabled: true,
-        searchHistory: true,
-        notifications: true,
-        cacheEnabled: true,
-        prefetchEnabled: true,
-      });
+      contextResetSettings();
     }
   };
 
@@ -133,8 +54,13 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
       reader.onload = (e) => {
         try {
           const importedSettings = JSON.parse(e.target?.result as string);
-          setSettings({ ...settings, ...importedSettings });
-        } catch (error) {
+          // Apply imported settings one by one
+          Object.entries(importedSettings).forEach(([key, value]) => {
+            if (key in settings) {
+              updateSetting(key as keyof typeof settings, value as never);
+            }
+          });
+        } catch {
           alert('Invalid settings file');
         }
       };
@@ -219,7 +145,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id as any)}
+                      onClick={() => setActiveTab(tab.id as typeof activeTab)}
                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
                         activeTab === tab.id
                           ? 'bg-yellow-400/20 text-yellow-400 border-l-4 border-yellow-400'
@@ -260,7 +186,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
                       </div>
                       <select
                         value={settings.fontSize}
-                        onChange={(e) => updateSetting('fontSize', e.target.value as any)}
+                        onChange={(e) => updateSetting('fontSize', e.target.value as 'small' | 'medium' | 'large')}
                         className="input-field w-32"
                       >
                         <option value="small">Small</option>

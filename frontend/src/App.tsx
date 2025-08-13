@@ -3,11 +3,13 @@ import { Search, Mic, Image, Settings as SettingsIcon, BarChart3, Download } fro
 import { apiService } from './services/api';
 import type { AnalyticsData, Suggestion } from './types/index';
 import Autocomplete from './components/Autocomplete';
+import MultiModeAutocomplete from './components/MultiModeAutocomplete';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Settings from './components/Settings';
 import DownloadModal from './components/DownloadModal';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 function App() {
   const [isConnected, setIsConnected] = useState(false);
@@ -56,7 +58,8 @@ function App() {
 
 
   return (
-    <div className="min-h-screen">
+    <SettingsProvider>
+      <div className="min-h-screen">
       {/* Header */}
       <header className="bg-glass border-b border-gray-700 sticky top-0 z-50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -162,14 +165,17 @@ function App() {
                 and real-time learning powered by a server-side Trie data structure.
               </p>
 
-              {/* Autocomplete Search */}
+              {/* Multi-Mode Autocomplete Search */}
               <div className="max-w-2xl mx-auto">
-                <Autocomplete
-                  placeholder="Start typing to see autocomplete suggestions..."
+                <MultiModeAutocomplete
+                  placeholder="Type single letters for word lists, or sentences for smart autocomplete..."
                   maxSuggestions={10}
                   onSelect={handleSuggestionSelect}
                   onSearch={handleSearch}
                   className="mb-4"
+                  enableSpellCheck={true}
+                  enableSentenceMode={true}
+                  enableContextPrediction={false}
                 />
 
                 {/* Connection Status */}
@@ -307,7 +313,8 @@ function App() {
         onClose={() => setIsDownloadModalOpen(false)}
         analytics={analytics}
       />
-    </div>
+      </div>
+    </SettingsProvider>
   );
 }
 

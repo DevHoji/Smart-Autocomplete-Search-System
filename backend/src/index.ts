@@ -15,6 +15,7 @@ import dotenv from 'dotenv';
 import { getDatabase } from '@/utils/database';
 import { errorHandler, notFoundHandler } from '@/utils/middleware';
 import { TrieService } from '@/services/TrieService';
+import { performanceOptimizer } from './services/performanceOptimizer';
 
 // Import route handlers
 import suggestRoutes from '@/routes/suggest';
@@ -132,12 +133,24 @@ async function startServer() {
     await trieService.loadFromDatabase();
     console.log('✅ Trie initialization completed');
 
+    // Warm up performance cache
+    console.log('Warming up performance cache...');
+    await performanceOptimizer.warmUpCache(async (query: string) => {
+      const result = await trieService.getSuggestions(query, 10);
+      return result.suggestions;
+    });
+    console.log('✅ Performance cache warmed up');
+
     // Start server
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
       console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
       console.log(`💾 Database connected: ${isDbConnected ? '✅' : '❌'}`);
+
+      // Log performance metrics
+      const metrics = performanceOptimizer.getMetrics();
+      console.log(`🚀 Cache initialized with ${metrics.suggestionCacheSize} entries`);
     });
 
   } catch (error) {
