@@ -135,9 +135,9 @@ const MultiModeAutocomplete: React.FC<MultiModeAutocompleteProps> = ({
 
   // Text-to-Speech for suggestions
   const tts = useTextToSpeech({
-    rate: settings.voiceSettings.rate,
-    pitch: settings.voiceSettings.pitch,
-    volume: settings.voiceSettings.volume,
+    rate: settings.voiceSpeed,
+    pitch: 1.0, // Default pitch since it's not in settings
+    volume: settings.volume / 100, // Convert percentage to 0-1 range
   });
 
   // Handle input changes
@@ -211,7 +211,8 @@ const MultiModeAutocomplete: React.FC<MultiModeAutocompleteProps> = ({
     const value = inputRef.current?.value || '';
     const wordInfo = getCurrentWordAtCursor(value, cursorPos);
 
-    if (misspelledWords.includes(wordInfo.word)) {
+    const misspelledWord = misspelledWords.find(mw => mw.word === wordInfo.word);
+    if (misspelledWord) {
       setSelectedMisspelledWord(wordInfo.word);
       setContextMenuPosition({ x: e.clientX, y: e.clientY });
     }
@@ -289,14 +290,18 @@ const MultiModeAutocomplete: React.FC<MultiModeAutocompleteProps> = ({
     
     return (
       <div className="absolute inset-0 pointer-events-none text-transparent whitespace-pre-wrap break-words">
-        {words.map((word, index) => (
-          <span
-            key={index}
-            className={misspelledWords.includes(word.trim()) ? 'border-b-2 border-red-500' : ''}
-          >
-            {word}
-          </span>
-        ))}
+        {words.map((word, index) => {
+          const trimmedWord = word.trim();
+          const isMisspelled = misspelledWords.some(mw => mw.word === trimmedWord);
+          return (
+            <span
+              key={index}
+              className={isMisspelled ? 'border-b-2 border-red-500' : ''}
+            >
+              {word}
+            </span>
+          );
+        })}
       </div>
     );
   };

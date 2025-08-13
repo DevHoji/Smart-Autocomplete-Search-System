@@ -249,6 +249,13 @@ export class TrieService {
   }
 
   /**
+   * Search for exact word match in Trie
+   */
+  public searchExact(word: string): TrieSuggestion | null {
+    return this.trie.searchExact(word);
+  }
+
+  /**
    * Get analytics data
    */
   public async getAnalytics(days: number = 7): Promise<AnalyticsStats> {

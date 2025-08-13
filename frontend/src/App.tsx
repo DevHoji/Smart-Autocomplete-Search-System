@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Mic, Image, Settings as SettingsIcon, BarChart3, Download } from 'lucide-react';
+import { Search, Mic, Image, Settings as SettingsIcon, BarChart3, Download, TestTube } from 'lucide-react';
 import { apiService } from './services/api';
 import type { AnalyticsData, Suggestion } from './types/index';
 import Autocomplete from './components/Autocomplete';
 import MultiModeAutocomplete from './components/MultiModeAutocomplete';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
+import AutocompleteTestSuite from './components/AutocompleteTestSuite';
 
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Settings from './components/Settings';
@@ -18,7 +19,7 @@ function App() {
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
-  const [currentView, setCurrentView] = useState<'search' | 'analytics' | 'settings'>('search');
+  const [currentView, setCurrentView] = useState<'search' | 'analytics' | 'settings' | 'test'>('search');
 
   useEffect(() => {
     // Test API connection on startup
@@ -114,6 +115,17 @@ function App() {
                 <BarChart3 className="w-5 h-5" />
               </button>
               <button
+                onClick={() => setCurrentView(currentView === 'test' ? 'search' : 'test')}
+                className={`p-2 transition-all duration-300 hover:scale-110 ${
+                  currentView === 'test'
+                    ? 'text-yellow-400 bg-yellow-400/10 border-glow'
+                    : 'text-gray-400 hover:text-yellow-400'
+                }`}
+                title={currentView === 'test' ? 'Back to Search' : 'Run Tests'}
+              >
+                <TestTube className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => setIsDownloadModalOpen(true)}
                 className="p-2 text-gray-400 hover:text-yellow-400 transition-all duration-300 hover:scale-110"
                 title="Export Data"
@@ -133,6 +145,9 @@ function App() {
         ) : currentView === 'settings' ? (
           /* Settings Page */
           <Settings onBack={() => setCurrentView('search')} />
+        ) : currentView === 'test' ? (
+          /* Test Suite */
+          <AutocompleteTestSuite />
         ) : connectionError ? (
           /* Connection Error */
           <div className="text-center py-12">

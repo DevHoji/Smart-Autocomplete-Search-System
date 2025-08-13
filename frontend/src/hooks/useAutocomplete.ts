@@ -35,7 +35,7 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
     error: undefined,
   });
 
-  const debounceTimeoutRef = useRef<number | null>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Debounced search function
@@ -221,6 +221,7 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
   return {
     state,
     actions: {
+      search: setQuery, // Alias for backward compatibility
       setQuery,
       selectSuggestion,
       clearSuggestions,

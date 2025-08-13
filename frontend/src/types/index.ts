@@ -227,6 +227,7 @@ export interface FilterOptions {
 export interface UseAutocompleteReturn {
   state: AutocompleteState;
   actions: {
+    search: (query: string) => void;
     setQuery: (query: string) => void;
     selectSuggestion: (index: number) => void;
     clearSuggestions: () => void;

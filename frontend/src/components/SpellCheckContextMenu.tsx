@@ -9,7 +9,8 @@ import { Check, Plus, X } from 'lucide-react';
 interface SpellCheckContextMenuProps {
   word: string;
   position: { x: number; y: number };
-  suggestions: string[];
+  suggestions?: string[];
+  getSuggestions?: (word: string) => string[];
   onSelect: (originalWord: string, correctedWord: string) => void;
   onAddToDictionary?: (word: string) => void;
   onIgnore?: (word: string) => void;
@@ -20,12 +21,16 @@ const SpellCheckContextMenu: React.FC<SpellCheckContextMenuProps> = ({
   word,
   position,
   suggestions,
+  getSuggestions,
   onSelect,
   onAddToDictionary,
   onIgnore,
   onClose,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Get suggestions either from props or by calling getSuggestions
+  const spellSuggestions = suggestions || (getSuggestions ? getSuggestions(word) : []);
 
   // Position the menu and handle viewport boundaries
   useEffect(() => {
@@ -116,12 +121,12 @@ const SpellCheckContextMenu: React.FC<SpellCheckContextMenuProps> = ({
       </div>
 
       {/* Suggestions */}
-      {suggestions.length > 0 && (
+      {spellSuggestions.length > 0 && (
         <div className="py-1">
           <div className="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wide">
             Suggestions
           </div>
-          {suggestions.map((suggestion, index) => (
+          {spellSuggestions.map((suggestion, index) => (
             <button
               key={index}
               onClick={() => handleSuggestionClick(suggestion)}
@@ -135,7 +140,7 @@ const SpellCheckContextMenu: React.FC<SpellCheckContextMenuProps> = ({
       )}
 
       {/* No suggestions message */}
-      {suggestions.length === 0 && (
+      {spellSuggestions.length === 0 && (
         <div className="px-3 py-2 text-sm text-gray-400 italic">
           No suggestions available
         </div>

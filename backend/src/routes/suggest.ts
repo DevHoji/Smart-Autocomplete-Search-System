@@ -255,9 +255,9 @@ router.get('/spell-check', async (req: Request, res: Response) => {
       });
     }
 
-    // Check if word exists in Trie (basic spell check)
-    const result = await trieService.getSuggestions(word.toLowerCase(), 1);
-    const isCorrect = result.suggestions.length > 0;
+    // Check if word exists exactly in Trie (proper spell check)
+    const exactMatch = trieService.searchExact(word.toLowerCase());
+    const isCorrect = exactMatch !== null;
 
     res.json({
       word: word,
