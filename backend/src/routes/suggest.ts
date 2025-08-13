@@ -47,7 +47,7 @@ router.get('/',
         category
       );
 
-      // Get suggestions directly from trie service (bypassing cache for debugging)
+      // Get suggestions directly from trie service
       const result = await trieService.getSuggestions(
         prefix,
         parseInt(k.toString()),
@@ -57,12 +57,8 @@ router.get('/',
 
       const responseTime = Date.now() - startTime;
 
-      // Debug logging
-      console.log('Direct result from trie service:', JSON.stringify(result, null, 2));
-
       // Ensure result is valid
       if (!result || !result.suggestions) {
-        console.error('Invalid result structure:', result);
         throw new Error('Invalid result from suggestion service');
       }
 
