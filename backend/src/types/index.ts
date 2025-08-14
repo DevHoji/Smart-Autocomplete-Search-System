@@ -1,8 +1,4 @@
-/**
- * Core type definitions for the Smart Autocomplete Search System
- */
 
-// Word-related types
 export interface Word {
   id?: number;
   word: string;
@@ -15,7 +11,6 @@ export interface Word {
   last_selected?: Date;
 }
 
-// Trie-related types
 export interface TrieNode {
   children: Map<string, TrieNode>;
   isEndOfWord: boolean;
@@ -32,7 +27,6 @@ export interface TrieSuggestion {
   metadata?: Record<string, any> | undefined;
 }
 
-// API request/response types
 export interface SuggestRequest {
   prefix: string;
   k?: number;
@@ -58,9 +52,9 @@ export interface InsertRequest {
   category?: string;
   synonyms?: string[];
   metadata?: Record<string, any>;
+  user_id?: string;
 }
 
-// Analytics types
 export interface SearchLog {
   id?: number;
   query_text: string;
@@ -92,7 +86,6 @@ export interface AnalyticsStats {
   }>;
 }
 
-// Socket.IO event types
 export interface SocketEvents {
   'trie:update': (data: {
     type: 'insert' | 'update' | 'delete';
@@ -105,13 +98,11 @@ export interface SocketEvents {
   }) => void;
 }
 
-// Database types
 export interface DatabaseConfig {
   connectionString: string;
   ssl?: boolean;
 }
 
-// Error types
 export interface ApiError {
   message: string;
   code: string;
@@ -119,14 +110,12 @@ export interface ApiError {
   details?: any;
 }
 
-// Fuzzy matching types
 export interface FuzzyMatch {
   word: string;
   distance: number;
   freq: number;
 }
 
-// Export configuration
 export interface TrieExport {
   version: string;
   timestamp: Date;

@@ -1,8 +1,3 @@
-/**
- * Admin endpoints - Analytics and system management
- * GET /api/admin/stats - Get analytics data
- * GET /api/admin/health - System health check
- */
 
 import { Router, Request, Response } from 'express';
 import { TrieService } from '@/services/TrieService';
@@ -12,16 +7,6 @@ import { analyticsQuerySchema } from '@/utils/validation';
 const router = Router();
 const trieService = TrieService.getInstance();
 
-/**
- * GET /api/admin/stats
- * Get comprehensive analytics data
- * 
- * Query Parameters:
- * - days: number (optional, default: 7) - Number of days to analyze
- * 
- * Response:
- * - Analytics data including search stats, top words, trending words
- */
 router.get('/stats', 
   validateRequest(analyticsQuerySchema, 'query'),
   asyncHandler(async (req: Request, res: Response) => {
@@ -30,13 +15,11 @@ router.get('/stats',
     const { days = 7 } = req.query as any;
 
     try {
-      // Get analytics data from TrieService
       const analytics = await trieService.getAnalytics(parseInt(days.toString()));
       const trieStats = trieService.getTrieStats();
       
       const responseTime = Date.now() - startTime;
 
-      // Combine all analytics data
       const analyticsData = {
         period: {
           days: parseInt(days.toString()),
@@ -95,22 +78,15 @@ router.get('/stats',
   })
 );
 
-/**
- * GET /api/admin/health
- * Comprehensive system health check
- * 
- * Response:
- * - System health status and diagnostics
- */
+
 router.get('/health', 
-  asyncHandler(async (req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     const startTime = Date.now();
 
     try {
       const trieStats = trieService.getTrieStats();
       const responseTime = Date.now() - startTime;
 
-      // Determine health status
       const isHealthy = trieStats.wordCount > 0;
       const status = isHealthy ? 'healthy' : 'degraded';
 
@@ -127,8 +103,8 @@ router.get('/health',
             avg_frequency: trieStats.avgFrequency,
           },
           database: {
-            status: 'unknown', // Would need to implement DB health check
-            connected: true, // Assume connected if we got here
+            status: 'unknown', 
+            connected: true, 
           },
           memory: {
             used: process.memoryUsage().heapUsed,
@@ -148,7 +124,7 @@ router.get('/health',
         },
       };
 
-      // Set appropriate status code
+      
       const statusCode = isHealthy ? 200 : 503;
 
       res.status(statusCode).json(healthData);
@@ -173,15 +149,9 @@ router.get('/health',
   })
 );
 
-/**
- * GET /api/admin/system
- * Get system information
- * 
- * Response:
- * - System and runtime information
- */
+
 router.get('/system', 
-  asyncHandler(async (req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     const startTime = Date.now();
 
     try {
@@ -231,20 +201,13 @@ router.get('/system',
   })
 );
 
-/**
- * POST /api/admin/reload
- * Reload Trie from database (admin function)
- * 
- * Response:
- * - Success status and new Trie stats
- */
+
 router.post('/reload', 
-  asyncHandler(async (req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     const startTime = Date.now();
 
     try {
-      // This would reload the Trie from database
-      // For now, just return current stats
+      
       const trieStats = trieService.getTrieStats();
       const responseTime = Date.now() - startTime;
 

@@ -1,13 +1,9 @@
-/**
- * Performance Optimizer Service
- * Optimizes Trie operations and caching for real-time sentence-level autocomplete
- */
 
 import { LRUCache } from 'lru-cache';
-import type { Suggestion } from '../types';
+import type { TrieSuggestion } from '../types';
 
 interface CacheEntry {
-  result: any; // Store the full result object
+  result: any; 
   timestamp: number;
   hitCount: number;
 }
@@ -25,8 +21,8 @@ export class PerformanceOptimizer {
   private contextCache: LRUCache<string, CacheEntry>;
   private metrics: PerformanceMetrics;
   private readonly maxCacheSize = 10000;
-  private readonly cacheExpiryMs = 5 * 60 * 1000; // 5 minutes
-  private readonly optimizationIntervalMs = 30 * 60 * 1000; // 30 minutes
+  private readonly cacheExpiryMs = 5 * 60 * 1000; 
+  private readonly optimizationIntervalMs = 30 * 60 * 1000; 
 
   constructor() {
     this.suggestionCache = new LRUCache<string, CacheEntry>({
@@ -47,13 +43,10 @@ export class PerformanceOptimizer {
       lastOptimization: Date.now(),
     };
 
-    // Start periodic optimization
     this.startPeriodicOptimization();
   }
 
-  /**
-   * Get cached suggestions or execute function and cache result
-   */
+
   async getCachedSuggestions<T>(
     cacheKey: string,
     fetchFunction: () => Promise<T>,
@@ -62,7 +55,6 @@ export class PerformanceOptimizer {
     const startTime = Date.now();
     const cache = useContextCache ? this.contextCache : this.suggestionCache;
     
-    // Check cache first
     const cached = cache.get(cacheKey);
     if (cached && this.isCacheEntryValid(cached)) {
       cached.hitCount++;
@@ -71,13 +63,11 @@ export class PerformanceOptimizer {
       return cached.result as T;
     }
 
-    // Cache miss - fetch new data
     this.metrics.cacheMisses++;
     
     try {
       const result = await fetchFunction();
       
-      // Cache the result
       const cacheEntry: CacheEntry = {
         result: result,
         timestamp: Date.now(),
@@ -94,9 +84,7 @@ export class PerformanceOptimizer {
     }
   }
 
-  /**
-   * Generate optimized cache key for suggestions
-   */
+ 
   generateSuggestionCacheKey(
     query: string,
     maxSuggestions: number,
@@ -106,15 +94,12 @@ export class PerformanceOptimizer {
     return `suggest:${normalizedQuery}:${maxSuggestions}:${category || 'all'}`;
   }
 
-  /**
-   * Generate optimized cache key for contextual suggestions
-   */
+ 
   generateContextCacheKey(
     context: string,
     currentWord: string,
     maxSuggestions: number
   ): string {
-    // Use only the last few words of context for better cache hits
     const contextWords = context.toLowerCase().trim().split(/\s+/);
     const relevantContext = contextWords.slice(-3).join(' '); // Last 3 words
     const normalizedWord = currentWord.toLowerCase().trim();
@@ -122,12 +107,10 @@ export class PerformanceOptimizer {
     return `context:${relevantContext}:${normalizedWord}:${maxSuggestions}`;
   }
 
-  /**
-   * Preload common suggestions into cache
-   */
+
   async preloadCommonSuggestions(
     commonQueries: string[],
-    fetchFunction: (query: string) => Promise<Suggestion[]>
+    fetchFunction: (query: string) => Promise<TrieSuggestion[]>
   ): Promise<void> {
     const preloadPromises = commonQueries.map(async (query) => {
       const cacheKey = this.generateSuggestionCacheKey(query, 10);
@@ -136,7 +119,7 @@ export class PerformanceOptimizer {
         try {
           const suggestions = await fetchFunction(query);
           const cacheEntry: CacheEntry = {
-            suggestions,
+            result: suggestions,
             timestamp: Date.now(),
             hitCount: 0,
           };
@@ -150,13 +133,10 @@ export class PerformanceOptimizer {
     await Promise.all(preloadPromises);
   }
 
-  /**
-   * Optimize cache by removing least used entries
-   */
+ 
   optimizeCache(): void {
     const now = Date.now();
     
-    // Clean expired entries and low-hit entries from suggestion cache
     for (const [key, entry] of this.suggestionCache.entries()) {
       if (!this.isCacheEntryValid(entry) || 
           (entry.hitCount < 2 && now - entry.timestamp > this.cacheExpiryMs / 2)) {
@@ -164,7 +144,6 @@ export class PerformanceOptimizer {
       }
     }
 
-    // Clean expired entries from context cache
     for (const [key, entry] of this.contextCache.entries()) {
       if (!this.isCacheEntryValid(entry)) {
         this.contextCache.delete(key);
@@ -174,9 +153,7 @@ export class PerformanceOptimizer {
     this.metrics.lastOptimization = now;
   }
 
-  /**
-   * Get performance metrics
-   */
+  
   getMetrics(): PerformanceMetrics & {
     cacheHitRate: number;
     suggestionCacheSize: number;
@@ -195,14 +172,11 @@ export class PerformanceOptimizer {
     };
   }
 
-  /**
-   * Clear all caches
-   */
+  
   clearCache(): void {
     this.suggestionCache.clear();
     this.contextCache.clear();
     
-    // Reset metrics
     this.metrics = {
       cacheHits: 0,
       cacheMisses: 0,
@@ -212,11 +186,9 @@ export class PerformanceOptimizer {
     };
   }
 
-  /**
-   * Warm up cache with common single-letter queries
-   */
+ 
   async warmUpCache(
-    fetchFunction: (query: string) => Promise<Suggestion[]>
+    fetchFunction: (query: string) => Promise<TrieSuggestion[]>
   ): Promise<void> {
     const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
     const commonWords = [
@@ -233,22 +205,17 @@ export class PerformanceOptimizer {
     console.log(`Cache warmed up with ${queriesToWarmUp.length} common queries`);
   }
 
-  /**
-   * Check if cache entry is still valid
-   */
+  
   private isCacheEntryValid(entry: CacheEntry): boolean {
     const now = Date.now();
     return now - entry.timestamp < this.cacheExpiryMs;
   }
 
-  /**
-   * Update performance metrics
-   */
+ 
   private updateMetrics(startTime: number): void {
     const responseTime = Date.now() - startTime;
     this.metrics.totalRequests++;
     
-    // Update average response time using exponential moving average
     if (this.metrics.averageResponseTime === 0) {
       this.metrics.averageResponseTime = responseTime;
     } else {
@@ -257,18 +224,14 @@ export class PerformanceOptimizer {
     }
   }
 
-  /**
-   * Start periodic cache optimization
-   */
+ 
   private startPeriodicOptimization(): void {
     setInterval(() => {
       this.optimizeCache();
     }, this.optimizationIntervalMs);
   }
 
-  /**
-   * Get cache statistics for monitoring
-   */
+ 
   getCacheStats(): {
     suggestionCache: { size: number; maxSize: number };
     contextCache: { size: number; maxSize: number };
@@ -288,5 +251,4 @@ export class PerformanceOptimizer {
   }
 }
 
-// Export singleton instance
 export const performanceOptimizer = new PerformanceOptimizer();

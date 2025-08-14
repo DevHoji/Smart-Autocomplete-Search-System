@@ -220,43 +220,43 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
   };
 
   const getMicButtonClass = () => {
-    const baseClass = 'p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
-    
+    const baseClass = 'p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 relative z-10';
+
     if (!voiceInput.state.isSupported) {
-      return `${baseClass} text-gray-300 cursor-not-allowed bg-gray-100`;
+      return `${baseClass} text-gray-300 cursor-not-allowed bg-gray-700`;
     }
-    
+
     if (voiceInput.state.isListening) {
       return `${baseClass} text-white bg-red-500 hover:bg-red-600 focus:ring-red-500 animate-pulse`;
     }
-    
+
     if (voiceInput.state.error) {
-      return `${baseClass} text-red-600 bg-red-50 hover:bg-red-100 focus:ring-red-500`;
+      return `${baseClass} text-red-400 bg-red-900 hover:bg-red-800 focus:ring-red-500`;
     }
-    
-    return `${baseClass} text-primary-600 bg-primary-50 hover:bg-primary-100 focus:ring-primary-500`;
+
+    return `${baseClass} text-yellow-400 bg-gray-700 hover:bg-gray-600 focus:ring-yellow-500`;
   };
 
   const getTTSButtonClass = () => {
-    const baseClass = 'p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
-    
+    const baseClass = 'p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 relative z-10';
+
     if (!tts.state.isSupported) {
-      return `${baseClass} text-gray-300 cursor-not-allowed bg-gray-100`;
+      return `${baseClass} text-gray-300 cursor-not-allowed bg-gray-700`;
     }
-    
+
     if (tts.state.isSpeaking) {
-      return `${baseClass} text-white bg-accent-500 hover:bg-accent-600 focus:ring-accent-500 animate-pulse`;
+      return `${baseClass} text-white bg-blue-500 hover:bg-blue-600 focus:ring-blue-500 animate-pulse`;
     }
-    
+
     if (!tts.state.isEnabled) {
-      return `${baseClass} text-gray-400 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500`;
+      return `${baseClass} text-gray-400 bg-gray-700 hover:bg-gray-600 focus:ring-gray-500`;
     }
-    
-    return `${baseClass} text-accent-600 bg-accent-50 hover:bg-accent-100 focus:ring-accent-500`;
+
+    return `${baseClass} text-blue-400 bg-gray-700 hover:bg-gray-600 focus:ring-blue-500`;
   };
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex items-center space-x-2 relative z-20 ${className}`}>
       {/* Voice Input Button */}
       <div className="relative">
         <button
@@ -264,8 +264,8 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
           disabled={!voiceInput.state.isSupported}
           className={getMicButtonClass()}
           aria-label={
-            voiceInput.state.isListening 
-              ? 'Stop voice input' 
+            voiceInput.state.isListening
+              ? 'Stop voice input'
               : 'Start voice input'
           }
           title={
@@ -285,7 +285,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
 
         {/* Listening indicator */}
         {voiceInput.state.isListening && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping z-30" />
         )}
       </div>
 
@@ -295,8 +295,8 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
         disabled={!tts.state.isSupported}
         className={getTTSButtonClass()}
         aria-label={
-          tts.state.isEnabled 
-            ? 'Disable voice output' 
+          tts.state.isEnabled
+            ? 'Disable voice output'
             : 'Enable voice output'
         }
         title={

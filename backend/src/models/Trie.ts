@@ -1,26 +1,4 @@
-/**
- * Trie (Prefix Tree) Implementation for Smart Autocomplete Search System
- * 
- * This is the core data structure that enables fast prefix-based autocomplete.
- * The Trie stores words with their frequencies and supports efficient:
- * - Insert: O(L) where L is the length of the word
- * - Search: O(L) for exact match, O(P) for prefix traversal
- * - TopK: O(P + S) where P is prefix length, S is nodes explored in subtree
- * - Delete: O(L) for word removal
- * 
- * Key Design Decisions:
- * 1. Each node stores a Map<string, TrieNode> for children (supports Unicode)
- * 2. Terminal nodes store the complete word for easy retrieval
- * 3. Frequency is stored at terminal nodes for ranking
- * 4. Metadata support for extensibility (categories, synonyms, etc.)
- */
-
 import { TrieNode, TrieSuggestion } from '@/types';
-
-/**
- * Internal TrieNode implementation
- * Uses Map for children to support Unicode characters efficiently
- */
 class TrieNodeImpl implements TrieNode {
   public children: Map<string, TrieNode>;
   public isEndOfWord: boolean;
@@ -35,10 +13,6 @@ class TrieNodeImpl implements TrieNode {
   }
 }
 
-/**
- * Min-Heap implementation for efficient topK extraction
- * Maintains the K highest frequency words during DFS traversal
- */
 class MinHeap {
   private heap: TrieSuggestion[];
   private maxSize: number;
@@ -48,25 +22,18 @@ class MinHeap {
     this.maxSize = maxSize;
   }
 
-  /**
-   * Add suggestion to heap, maintaining size constraint
-   * Time Complexity: O(log K)
-   */
+  
   public add(suggestion: TrieSuggestion): void {
     if (this.heap.length < this.maxSize) {
       this.heap.push(suggestion);
       this.heapifyUp(this.heap.length - 1);
     } else if (suggestion.freq > this.heap[0]!.freq) {
-      // Replace minimum element if new suggestion has higher frequency
+      
       this.heap[0] = suggestion;
       this.heapifyDown(0);
     }
   }
 
-  /**
-   * Get all suggestions sorted by frequency (descending)
-   * Time Complexity: O(K log K)
-   */
   public getSorted(): TrieSuggestion[] {
     return this.heap.sort((a, b) => b.freq - a.freq);
   }
@@ -101,9 +68,7 @@ class MinHeap {
   }
 }
 
-/**
- * Main Trie class implementing the prefix tree data structure
- */
+
 export class Trie {
   private root: TrieNode;
   private wordCount: number;
@@ -116,13 +81,11 @@ export class Trie {
   }
 
   /**
-   * Insert a word into the Trie with frequency and metadata
-   * Time Complexity: O(L) where L is the length of the word
-   * Space Complexity: O(L) in worst case (all new nodes)
+   
    * 
-   * @param word - The word to insert
-   * @param freq - Frequency/weight of the word (default: 1)
-   * @param metadata - Additional data (category, synonyms, etc.)
+   * @param word
+   * @param freq 
+   * @param metadata 
    */
   public insert(word: string, freq: number = 1, metadata?: Record<string, any>): void {
     if (!word || word.trim().length === 0) {
@@ -132,7 +95,7 @@ export class Trie {
     const normalizedWord = word.toLowerCase().trim();
     let currentNode = this.root;
 
-    // Traverse/create path for each character
+    
     for (const char of normalizedWord) {
       if (!currentNode.children.has(char)) {
         currentNode.children.set(char, new TrieNodeImpl());
@@ -140,17 +103,17 @@ export class Trie {
       currentNode = currentNode.children.get(char)!;
     }
 
-    // Mark as end of word and store data
+    
     const wasNewWord = !currentNode.isEndOfWord;
     currentNode.isEndOfWord = true;
     currentNode.word = normalizedWord;
     
-    // Update frequency (add to existing or set new)
+    
     const oldFreq = currentNode.freq;
     currentNode.freq = wasNewWord ? freq : currentNode.freq + freq;
     currentNode.metadata = { ...currentNode.metadata, ...metadata };
 
-    // Update statistics
+    
     if (wasNewWord) {
       this.wordCount++;
     }
@@ -158,11 +121,10 @@ export class Trie {
   }
 
   /**
-   * Search for exact word match
-   * Time Complexity: O(L) where L is the length of the word
+   
    * 
-   * @param word - The word to search for
-   * @returns TrieSuggestion if found, null otherwise
+   * @param word 
+   * @returns 
    */
   public searchExact(word: string): TrieSuggestion | null {
     const normalizedWord = word.toLowerCase().trim();
@@ -182,43 +144,37 @@ export class Trie {
   }
 
   /**
-   * Get top K suggestions for a given prefix
-   * Time Complexity: O(P + S) where P is prefix length, S is nodes explored
    * 
-   * This is the core method for autocomplete functionality.
-   * Uses DFS with a min-heap to efficiently find the K most frequent words.
-   * 
-   * @param prefix - The prefix to search for
-   * @param k - Maximum number of suggestions to return
-   * @param category - Optional category filter
-   * @returns Array of TrieSuggestion sorted by frequency (descending)
+   * @param prefix 
+   * @param k 
+   * @param category
+   * @returns 
    */
   public topK(prefix: string, k: number = 10, category?: string): TrieSuggestion[] {
     if (k <= 0) return [];
     
     const normalizedPrefix = prefix.toLowerCase().trim();
     
-    // Find the node representing the prefix
+   
     const prefixNode = this.findNode(normalizedPrefix);
     if (!prefixNode) {
-      return []; // Prefix not found
+      return []; 
     }
 
-    // Use min-heap to maintain top K suggestions efficiently
+    
     const heap = new MinHeap(k);
     
-    // DFS from prefix node to collect suggestions
+    
     this.dfsCollect(prefixNode, heap, category);
     
     return heap.getSorted();
   }
 
   /**
-   * Delete a word from the Trie
-   * Time Complexity: O(L) where L is the length of the word
+   
    *
-   * @param word - The word to delete
-   * @returns true if word was deleted, false if not found
+   * @param word 
+   * @returns 
    */
   public delete(word: string): boolean {
     const normalizedWord = word.toLowerCase().trim();
@@ -227,10 +183,9 @@ export class Trie {
   }
 
   /**
-   * Get all words with their frequencies
-   * Time Complexity: O(N) where N is total number of nodes
+   * 
    *
-   * @returns Array of all words in the Trie
+   * @returns 
    */
   public getAllWords(): TrieSuggestion[] {
     const words: TrieSuggestion[] = [];
@@ -239,10 +194,9 @@ export class Trie {
   }
 
   /**
-   * Export Trie structure as JSON for backup/analysis
-   * Time Complexity: O(N) where N is total number of nodes
+   
    *
-   * @returns JSON representation of the Trie
+   * @returns 
    */
   public toJSON(): any {
     return {
@@ -255,10 +209,9 @@ export class Trie {
   }
 
   /**
-   * Import Trie structure from JSON
-   * Time Complexity: O(N) where N is total number of nodes
+  
    *
-   * @param data - JSON data to import
+   * @param data 
    */
   public fromJSON(data: any): void {
     if (!data.root) {
@@ -271,9 +224,9 @@ export class Trie {
   }
 
   /**
-   * Get the frequency of a specific word
-   * @param word - The word to get frequency for
-   * @returns The frequency of the word, or 0 if not found
+   
+   * @param word 
+   * @returns 
    */
   public getWordFrequency(word: string): number {
     let current = this.root;
@@ -286,13 +239,12 @@ export class Trie {
       current = child;
     }
 
-    return current.isEndOfWord ? (current.frequency || 0) : 0;
+    return current.isEndOfWord ? (current.freq || 0) : 0;
   }
 
   /**
-   * Get Trie statistics
-   *
-   * @returns Object containing Trie statistics
+   
+   * @returns 
    */
   public getStats(): {
     wordCount: number;
@@ -314,12 +266,10 @@ export class Trie {
   }
 
   /**
-   * Update frequency of an existing word
-   * Time Complexity: O(L) where L is the length of the word
-   *
-   * @param word - The word to update
-   * @param newFreq - New frequency value
-   * @returns true if updated, false if word not found
+  
+   * @param word 
+   * @param newFreq 
+   * @returns 
    */
   public updateFrequency(word: string, newFreq: number): boolean {
     const normalizedWord = word.toLowerCase().trim();
@@ -336,12 +286,11 @@ export class Trie {
   }
 
   /**
-   * Increment frequency of an existing word (for learning)
-   * Time Complexity: O(L) where L is the length of the word
+  
    *
-   * @param word - The word to increment
-   * @param increment - Amount to increment (default: 1)
-   * @returns new frequency if updated, -1 if word not found
+   * @param word 
+   * @param increment 
+   * @returns
    */
   public incrementFrequency(word: string, increment: number = 1): number {
     const normalizedWord = word.toLowerCase().trim();
@@ -356,12 +305,6 @@ export class Trie {
     return -1;
   }
 
-  // Private helper methods
-
-  /**
-   * Find node for a given word/prefix
-   * Time Complexity: O(L) where L is the length of the word
-   */
   private findNode(word: string): TrieNode | null {
     let currentNode = this.root;
 
@@ -375,14 +318,11 @@ export class Trie {
     return currentNode;
   }
 
-  /**
-   * DFS helper for collecting top K suggestions
-   * Explores the subtree and adds valid words to the heap
-   */
+ 
   private dfsCollect(node: TrieNode, heap: MinHeap, category?: string): void {
-    // If current node is end of word, consider it as a suggestion
+    
     if (node.isEndOfWord && node.word) {
-      // Apply category filter if specified
+      
       if (!category || node.metadata?.['category'] === category) {
         heap.add({
           word: node.word,
@@ -394,15 +334,13 @@ export class Trie {
       }
     }
 
-    // Recursively explore all children
+ 
     for (const childNode of node.children.values()) {
       this.dfsCollect(childNode, heap, category);
     }
   }
 
-  /**
-   * DFS helper for collecting all words
-   */
+  
   private dfsCollectAll(node: TrieNode, words: TrieSuggestion[]): void {
     if (node.isEndOfWord && node.word) {
       words.push({
@@ -419,25 +357,22 @@ export class Trie {
     }
   }
 
-  /**
-   * Recursive helper for word deletion with result tracking
-   * Returns object with deletion status and whether node should be deleted
-   */
+  
   private deleteHelperWithResult(node: TrieNode, word: string, index: number): { deleted: boolean; shouldDelete: boolean } {
     if (index === word.length) {
-      // Reached end of word
+      
       if (!node.isEndOfWord) {
-        return { deleted: false, shouldDelete: false }; // Word doesn't exist
+        return { deleted: false, shouldDelete: false }; 
       }
 
-      // Mark as not end of word
+      
       node.isEndOfWord = false;
       this.totalFrequency -= node.freq;
       node.freq = 0;
       delete (node as any).word;
       this.wordCount--;
 
-      // Return true if node has no children (can be deleted)
+      
       return { deleted: true, shouldDelete: node.children.size === 0 };
     }
 
@@ -445,7 +380,7 @@ export class Trie {
     const childNode = node.children.get(char);
 
     if (!childNode) {
-      return { deleted: false, shouldDelete: false }; // Word doesn't exist
+      return { deleted: false, shouldDelete: false }; 
     }
 
     const result = this.deleteHelperWithResult(childNode, word, index + 1);
@@ -454,7 +389,7 @@ export class Trie {
       node.children.delete(char);
     }
 
-    // Current node should be deleted if it's not end of word and has no children
+    
     const shouldDelete = !node.isEndOfWord && node.children.size === 0;
 
     return { deleted: result.deleted, shouldDelete };
@@ -462,9 +397,7 @@ export class Trie {
 
 
 
-  /**
-   * Convert node to JSON representation
-   */
+ 
   private nodeToJSON(node: TrieNode): any {
     const result: any = {
       isEndOfWord: node.isEndOfWord,
@@ -489,9 +422,7 @@ export class Trie {
     return result;
   }
 
-  /**
-   * Create node from JSON representation
-   */
+  
   private nodeFromJSON(data: any): TrieNode {
     const node = new TrieNodeImpl();
     node.isEndOfWord = data.isEndOfWord || false;
@@ -508,11 +439,9 @@ export class Trie {
     return node;
   }
 
-  /**
-   * Count total number of nodes in the Trie
-   */
+
   private countNodes(node: TrieNode): number {
-    let count = 1; // Count current node
+    let count = 1; 
 
     for (const childNode of node.children.values()) {
       count += this.countNodes(childNode);
@@ -521,9 +450,7 @@ export class Trie {
     return count;
   }
 
-  /**
-   * Get maximum depth of the Trie
-   */
+  
   private getMaxDepth(node: TrieNode, currentDepth: number): number {
     let maxDepth = currentDepth;
 

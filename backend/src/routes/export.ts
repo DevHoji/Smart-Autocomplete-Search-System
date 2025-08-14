@@ -1,9 +1,3 @@
-/**
- * Export endpoint - Export Trie data
- * GET /api/export-trie
- * 
- * Allows exporting the current Trie state for backup or analysis
- */
 
 import { Router, Request, Response } from 'express';
 import { TrieService } from '@/services/TrieService';
@@ -13,17 +7,7 @@ import { exportQuerySchema } from '@/utils/validation';
 const router = Router();
 const trieService = TrieService.getInstance();
 
-/**
- * GET /api/export-trie
- * Export the current Trie state as JSON
- * 
- * Query Parameters:
- * - format: string (optional, default: 'json') - Export format
- * - include_metadata: boolean (optional, default: true) - Include metadata
- * 
- * Response:
- * - JSON representation of the Trie structure
- */
+
 router.get('/', 
   validateRequest(exportQuerySchema, 'query'),
   asyncHandler(async (req: Request, res: Response) => {
@@ -32,13 +16,11 @@ router.get('/',
     const { format = 'json', include_metadata = true } = req.query as any;
 
     try {
-      // Export the Trie
       const trieData = trieService.exportTrie();
       const stats = trieService.getTrieStats();
       
       const responseTime = Date.now() - startTime;
 
-      // Prepare export data
       const exportData = {
         export_info: {
           format: format,
@@ -55,12 +37,10 @@ router.get('/',
         },
         trie_data: include_metadata ? trieData : {
           ...trieData,
-          // Remove metadata if not requested
           root: removeMetadataFromNodes(trieData.root),
         },
       };
 
-      // Set appropriate headers
       res.set({
         'Content-Type': 'application/json',
         'Content-Disposition': `attachment; filename="trie-export-${new Date().toISOString().split('T')[0]}.json"`,
@@ -92,24 +72,16 @@ router.get('/',
   })
 );
 
-/**
- * GET /api/export-trie/words
- * Export just the words list without Trie structure
- * 
- * Response:
- * - Array of words with their data
- */
+
 router.get('/words', 
-  asyncHandler(async (req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     const startTime = Date.now();
 
     try {
-      // Get all words from Trie (this would need to be implemented in TrieService)
       const stats = trieService.getTrieStats();
       
       const responseTime = Date.now() - startTime;
 
-      // For now, return stats and indicate this needs implementation
       const exportData = {
         export_info: {
           format: 'words_list',
@@ -122,8 +94,7 @@ router.get('/words',
           total_frequency: stats.totalFrequency,
           avg_frequency: stats.avgFrequency,
         },
-        // This would contain the actual words list
-        words: [], // TODO: Implement getAllWords() in TrieService
+        words: [], 
         note: 'Word list export not yet fully implemented',
       };
 
@@ -150,15 +121,9 @@ router.get('/words',
   })
 );
 
-/**
- * GET /api/export-trie/stats
- * Export just the Trie statistics
- * 
- * Response:
- * - Detailed statistics about the Trie
- */
+
 router.get('/stats', 
-  asyncHandler(async (req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     const startTime = Date.now();
 
     try {
@@ -208,9 +173,7 @@ router.get('/stats',
   })
 );
 
-/**
- * Helper function to remove metadata from Trie nodes recursively
- */
+
 function removeMetadataFromNodes(node: any): any {
   if (!node) return node;
 

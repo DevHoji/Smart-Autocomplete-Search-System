@@ -1,7 +1,3 @@
-/**
- * Database connection and query utilities
- * Handles PostgreSQL connection using node-postgres (pg)
- */
 
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import { DatabaseConfig } from '@/types';
@@ -13,23 +9,20 @@ class Database {
   private constructor(config: DatabaseConfig) {
     this.pool = new Pool({
       connectionString: config.connectionString,
-      ssl: { rejectUnauthorized: false }, // Always use SSL for Neon
-      max: 20, // Maximum number of clients in the pool
-      idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-      connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
-      query_timeout: 30000, // Query timeout
+      ssl: { rejectUnauthorized: false }, 
+      max: 20, 
+      idleTimeoutMillis: 30000, 
+      connectionTimeoutMillis: 10000, 
+      query_timeout: 30000, 
     });
 
-    // Handle pool errors
     this.pool.on('error', (err) => {
       console.error('Unexpected error on idle client', err);
       process.exit(-1);
     });
   }
 
-  /**
-   * Get singleton instance of Database
-   */
+ 
   public static getInstance(config?: DatabaseConfig): Database {
     if (!Database.instance) {
       if (!config) {
@@ -40,9 +33,7 @@ class Database {
     return Database.instance;
   }
 
-  /**
-   * Execute a query with parameters
-   */
+  
   public async query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
     const start = Date.now();
     try {
@@ -60,16 +51,12 @@ class Database {
     }
   }
 
-  /**
-   * Get a client from the pool for transactions
-   */
+  
   public async getClient(): Promise<PoolClient> {
     return await this.pool.connect();
   }
 
-  /**
-   * Execute a transaction
-   */
+ 
   public async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
     const client = await this.getClient();
     try {
@@ -85,9 +72,7 @@ class Database {
     }
   }
 
-  /**
-   * Test database connection
-   */
+ 
   public async testConnection(): Promise<boolean> {
     try {
       const result = await this.query('SELECT NOW()');
@@ -99,16 +84,12 @@ class Database {
     }
   }
 
-  /**
-   * Close all connections in the pool
-   */
+ 
   public async close(): Promise<void> {
     await this.pool.end();
   }
 
-  /**
-   * Get pool statistics
-   */
+  
   public getPoolStats() {
     return {
       totalCount: this.pool.totalCount,
@@ -118,8 +99,6 @@ class Database {
   }
 }
 
-// Export singleton instance getter
 export const getDatabase = (config?: DatabaseConfig) => Database.getInstance(config);
 
-// Export for testing
 export { Database };

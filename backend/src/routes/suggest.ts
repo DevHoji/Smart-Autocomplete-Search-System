@@ -1,53 +1,25 @@
-/**
- * Suggest endpoint - Core autocomplete functionality
- * GET /api/suggest?prefix=...&k=...&category=...
- * 
- * Returns top K suggestions for a given prefix using the server-side Trie
- */
+
 
 import { Router, Request, Response } from 'express';
 import { TrieService } from '@/services/TrieService';
 import { asyncHandler, validateRequest } from '@/utils/middleware';
 import { suggestQuerySchema } from '@/utils/validation';
-import { SuggestRequest, SuggestResponse } from '@/types';
-import { performanceOptimizer } from '../services/performanceOptimizer';
+import { SuggestResponse } from '@/types';
 
 const router = Router();
 const trieService = TrieService.getInstance();
 
-/**
- * GET /api/suggest
- * Get autocomplete suggestions for a prefix
- * 
- * Query Parameters:
- * - prefix: string (required) - The prefix to search for
- * - k: number (optional, default: 10) - Maximum number of suggestions
- * - category: string (optional) - Filter by category
- * 
- * Response:
- * - suggestions: TrieSuggestion[] - Array of suggestions sorted by frequency
- * - prefix: string - The original prefix
- * - total: number - Total number of suggestions returned
- * - fuzzy: boolean - Whether fuzzy matching was used
- */
+
 router.get('/', 
   validateRequest(suggestQuerySchema, 'query'),
   asyncHandler(async (req: Request, res: Response) => {
     const startTime = Date.now();
     
-    // Extract and validate query parameters
     const { prefix, k = 10, category } = req.query as any;
     const userId = req.headers['x-user-id'] as string;
 
     try {
-      // Generate cache key
-      const cacheKey = performanceOptimizer.generateSuggestionCacheKey(
-        prefix,
-        parseInt(k.toString()),
-        category
-      );
-
-      // Get suggestions directly from trie service
+   
       const result = await trieService.getSuggestions(
         prefix,
         parseInt(k.toString()),
@@ -57,19 +29,16 @@ router.get('/',
 
       const responseTime = Date.now() - startTime;
 
-      // Ensure result is valid
       if (!result || !result.suggestions) {
         throw new Error('Invalid result from suggestion service');
       }
 
-      // Add performance headers
       res.set({
         'X-Response-Time': `${responseTime}ms`,
         'X-Suggestion-Count': result.suggestions.length.toString(),
-        'X-Cache-Status': 'HIT', // Enhanced with caching
+        'X-Cache-Status': 'HIT', 
       });
 
-      // Return suggestions
       const response: SuggestResponse = {
         suggestions: result.suggestions,
         prefix: result.prefix,
@@ -82,7 +51,6 @@ router.get('/',
     } catch (error) {
       console.error('Error in suggest endpoint:', error);
       
-      // Return empty suggestions on error to maintain UX
       const response: SuggestResponse = {
         suggestions: [],
         prefix: prefix || '',
@@ -101,12 +69,9 @@ router.get('/',
   })
 );
 
-/**
- * GET /api/suggest/stats
- * Get statistics about the suggestion system
- */
+
 router.get('/stats', 
-  asyncHandler(async (req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     try {
       const stats = trieService.getTrieStats();
       
@@ -128,12 +93,9 @@ router.get('/stats',
   })
 );
 
-/**
- * GET /api/suggest/health
- * Health check for the suggestion system
- */
+
 router.get('/health', 
-  asyncHandler(async (req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     try {
       const stats = trieService.getTrieStats();
       
@@ -161,7 +123,6 @@ router.get('/health',
   })
 );
 
-// Contextual suggestions endpoint
 router.post('/contextual-suggestions', async (req: Request, res: Response) => {
   try {
     const { context, currentWord, maxSuggestions = 5 } = req.body;
@@ -178,15 +139,12 @@ router.post('/contextual-suggestions', async (req: Request, res: Response) => {
       });
     }
 
-    // For now, use simple contextual logic
-    // In a real implementation, this could use AI/ML models
+   
     const contextWords = context.toLowerCase().split(/\s+/).filter(w => w.length > 0);
     const lastWord = contextWords[contextWords.length - 1];
 
-    // Simple context-based suggestions
     const contextualSuggestions: string[] = [];
 
-    // Common word patterns based on context
     const contextPatterns: Record<string, string[]> = {
       'i': ['am', 'was', 'will', 'have', 'can', 'would', 'should'],
       'the': ['best', 'most', 'first', 'last', 'only', 'main', 'next'],
@@ -209,17 +167,14 @@ router.post('/contextual-suggestions', async (req: Request, res: Response) => {
       }
     }
 
-    // Get regular Trie suggestions as fallback
     const trieResult = await trieService.getSuggestions(currentWord, maxSuggestions);
     const trieSuggestions = trieResult.suggestions.map(s => s.word);
 
-    // Combine contextual and Trie suggestions
     const allSuggestions = [
       ...contextualSuggestions.slice(0, Math.floor(maxSuggestions / 2)),
       ...trieSuggestions.slice(0, Math.ceil(maxSuggestions / 2))
     ];
 
-    // Remove duplicates and format
     const uniqueSuggestions = Array.from(new Set(allSuggestions))
       .slice(0, maxSuggestions)
       .map(word => ({
@@ -234,6 +189,7 @@ router.post('/contextual-suggestions', async (req: Request, res: Response) => {
       context: context,
       currentWord: currentWord,
     });
+    return;
 
   } catch (error) {
     console.error('Contextual suggestions error:', error);
@@ -241,10 +197,10 @@ router.post('/contextual-suggestions', async (req: Request, res: Response) => {
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error',
     });
+    return;
   }
 });
 
-// Spell check endpoint
 router.get('/spell-check', async (req: Request, res: Response) => {
   try {
     const { word } = req.query;
@@ -255,7 +211,6 @@ router.get('/spell-check', async (req: Request, res: Response) => {
       });
     }
 
-    // Check if word exists exactly in Trie (proper spell check)
     const exactMatch = trieService.searchExact(word.toLowerCase());
     const isCorrect = exactMatch !== null;
 
@@ -263,6 +218,7 @@ router.get('/spell-check', async (req: Request, res: Response) => {
       word: word,
       isCorrect: isCorrect,
     });
+    return;
 
   } catch (error) {
     console.error('Spell check error:', error);
@@ -270,10 +226,10 @@ router.get('/spell-check', async (req: Request, res: Response) => {
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error',
     });
+    return;
   }
 });
 
-// Spell suggestions endpoint
 router.get('/spell-suggestions', async (req: Request, res: Response) => {
   try {
     const { word, max = '5' } = req.query;
@@ -286,7 +242,6 @@ router.get('/spell-suggestions', async (req: Request, res: Response) => {
 
     const maxSuggestions = parseInt(max as string, 10) || 5;
 
-    // Generate spell suggestions using fuzzy matching
     const result = await trieService.getSuggestions(word, maxSuggestions);
     const suggestions = result.suggestions.map(s => s.word);
 
@@ -294,6 +249,7 @@ router.get('/spell-suggestions', async (req: Request, res: Response) => {
       word: word,
       suggestions: suggestions,
     });
+    return;
 
   } catch (error) {
     console.error('Spell suggestions error:', error);
@@ -301,6 +257,7 @@ router.get('/spell-suggestions', async (req: Request, res: Response) => {
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error',
     });
+    return;
   }
 });
 

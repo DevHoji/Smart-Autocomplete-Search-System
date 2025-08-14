@@ -38,9 +38,45 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Detect if text contains Amharic characters
+  const isAmharicText = useCallback((text: string): boolean => {
+    // Amharic Unicode range: U+1200-U+137F
+    const amharicRegex = /[\u1200-\u137F]/;
+    return amharicRegex.test(text);
+  }, []);
+
+  // Extract current word being typed from cursor position
+  const getCurrentWord = useCallback((text: string, cursorPosition?: number): { word: string; startIndex: number; endIndex: number; isAmharic: boolean } => {
+    if (!text.trim()) {
+      return { word: '', startIndex: 0, endIndex: 0, isAmharic: false };
+    }
+
+    // If no cursor position provided, use end of text
+    const pos = cursorPosition ?? text.length;
+
+    // Find word boundaries around cursor position
+    let startIndex = pos;
+    let endIndex = pos;
+
+    // Move backwards to find start of current word
+    while (startIndex > 0 && /\S/.test(text[startIndex - 1])) {
+      startIndex--;
+    }
+
+    // Move forwards to find end of current word
+    while (endIndex < text.length && /\S/.test(text[endIndex])) {
+      endIndex++;
+    }
+
+    const word = text.slice(startIndex, endIndex).trim();
+    const isAmharic = isAmharicText(word);
+
+    return { word, startIndex, endIndex, isAmharic };
+  }, [isAmharicText]);
+
   // Debounced search function
   const debouncedSearch = useCallback(
-    async (query: string) => {
+    async (query: string, cursorPosition?: number) => {
       // Cancel previous request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -51,8 +87,11 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
         clearTimeout(debounceTimeoutRef.current);
       }
 
-      // If query is empty, clear suggestions
-      if (!query.trim()) {
+      // Extract current word being typed
+      const { word: currentWord, isAmharic } = getCurrentWord(query, cursorPosition);
+
+      // If current word is empty or too short, clear suggestions
+      if (!currentWord || currentWord.length < 1) {
         setState(prev => ({
           ...prev,
           suggestions: [],
@@ -62,6 +101,9 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
         }));
         return;
       }
+
+      // Determine category based on language
+      const searchCategory = isAmharic ? 'amharic' : category;
 
       // Set loading state
       setState(prev => ({
@@ -76,10 +118,11 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
           // Create new abort controller for this request
           abortControllerRef.current = new AbortController();
 
+          // Search using only the current word with language-specific category
           const response = await apiService.getSuggestions(
-            query.trim(),
+            currentWord,
             maxSuggestions,
-            category
+            searchCategory
           );
 
           // Check if request was aborted
@@ -123,42 +166,51 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
         }
       }, debounceMs);
     },
-    [debounceMs, maxSuggestions, category, onSearch, onError]
+    [debounceMs, maxSuggestions, category, onSearch, onError, getCurrentWord]
   );
 
   // Set query and trigger search
-  const setQuery = useCallback((query: string) => {
+  const setQuery = useCallback((query: string, cursorPosition?: number) => {
     setState(prev => ({
       ...prev,
       query,
     }));
 
-    debouncedSearch(query);
+    debouncedSearch(query, cursorPosition);
   }, [debouncedSearch]);
 
   // Select suggestion by index
-  const selectSuggestion = useCallback(async (index: number) => {
+  const selectSuggestion = useCallback(async (index: number, cursorPosition?: number) => {
     const suggestion = state.suggestions[index];
     if (!suggestion) return;
 
     try {
+      // Get current word info
+      const { word: currentWord, startIndex, endIndex } = getCurrentWord(state.query, cursorPosition);
+
       // Record the selection
       await apiService.selectSuggestion({
         word: suggestion.word,
-        prefix: state.query,
+        prefix: currentWord,
       });
+
+      // Replace only the current word with the selected suggestion
+      const newQuery = state.query.slice(0, startIndex) + suggestion.word + state.query.slice(endIndex);
 
       // Update state
       setState(prev => ({
         ...prev,
-        query: suggestion.word,
+        query: newQuery,
         isOpen: false,
         selectedIndex: -1,
       }));
 
-      // Call onSelect callback
+      // Call onSelect callback with the new complete query
       if (onSelect) {
-        onSelect(suggestion);
+        onSelect({
+          ...suggestion,
+          word: newQuery, // Pass the complete text
+        });
       }
 
     } catch (error: unknown) {
@@ -173,7 +225,7 @@ export function useAutocomplete(options: UseAutocompleteOptions = {}): UseAutoco
         onError(errorMessage);
       }
     }
-  }, [state.suggestions, state.query, onSelect, onError]);
+  }, [state.suggestions, state.query, onSelect, onError, getCurrentWord]);
 
   // Clear suggestions and close dropdown
   const clearSuggestions = useCallback(() => {

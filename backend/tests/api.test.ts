@@ -1,21 +1,21 @@
-/**
- * Integration tests for API endpoints
- * Tests the REST API functionality and database integration
- */
 
 import request from 'supertest';
 import { app } from '../src/index';
-import { dbService } from '../src/services/dbService';
+import { getDatabase } from '../src/utils/database';
 
 describe('API Endpoints', () => {
+  let db: any;
+
   beforeAll(async () => {
-    // Initialize test database
-    await dbService.initializeDatabase();
+    db = getDatabase({
+      connectionString: process.env['DATABASE_URL'] || 'postgresql://localhost:5432/test'
+    });
   });
 
   afterAll(async () => {
-    // Clean up database connections
-    await dbService.close();
+    if (db) {
+      await db.close();
+    }
   });
 
   describe('Health Check', () => {
@@ -62,12 +62,10 @@ describe('API Endpoints', () => {
     });
 
     test('GET /api/suggest should validate parameters', async () => {
-      // Test invalid k parameter
       await request(app)
         .get('/api/suggest?prefix=test&k=-1')
         .expect(400);
 
-      // Test missing prefix
       await request(app)
         .get('/api/suggest?k=5')
         .expect(400);
@@ -99,7 +97,6 @@ describe('API Endpoints', () => {
     });
 
     test('POST /api/select should validate required fields', async () => {
-      // Test missing word
       await request(app)
         .post('/api/select')
         .send({
@@ -108,7 +105,6 @@ describe('API Endpoints', () => {
         })
         .expect(400);
 
-      // Test empty word
       await request(app)
         .post('/api/select')
         .send({
@@ -146,14 +142,12 @@ describe('API Endpoints', () => {
       expect(response.body).toHaveProperty('trending_words');
       expect(response.body).toHaveProperty('performance');
 
-      // Validate search analytics structure
       const searchAnalytics = response.body.search_analytics;
       expect(searchAnalytics).toHaveProperty('total_searches');
       expect(searchAnalytics).toHaveProperty('total_selections');
       expect(searchAnalytics).toHaveProperty('avg_response_time');
       expect(searchAnalytics).toHaveProperty('success_rate');
 
-      // Validate trie stats structure
       const trieStats = response.body.trie_stats;
       expect(trieStats).toHaveProperty('word_count');
       expect(trieStats).toHaveProperty('total_frequency');
@@ -176,7 +170,6 @@ describe('API Endpoints', () => {
     });
 
     test('GET /api/admin/stats should validate days parameter', async () => {
-      // Test invalid days parameter
       await request(app)
         .get('/api/admin/stats?days=0')
         .expect(400);
@@ -230,7 +223,7 @@ describe('API Endpoints', () => {
         .expect(200);
       
       const duration = Date.now() - start;
-      expect(duration).toBeLessThan(100); // Should respond within 100ms
+      expect(duration).toBeLessThan(100); 
     });
 
     test('should handle concurrent requests', async () => {
@@ -242,7 +235,7 @@ describe('API Endpoints', () => {
 
       const responses = await Promise.all(requests);
       expect(responses).toHaveLength(10);
-      responses.forEach(response => {
+      responses.forEach((response: any) => {
         expect(response.body).toHaveProperty('suggestions');
       });
     });
@@ -250,7 +243,7 @@ describe('API Endpoints', () => {
 
   describe('Rate Limiting', () => {
     test('should handle multiple requests from same IP', async () => {
-      // Make multiple requests quickly
+     
       const requests = Array(20).fill(null).map(() =>
         request(app)
           .get('/api/suggest?prefix=test&k=5')
@@ -258,8 +251,7 @@ describe('API Endpoints', () => {
 
       const responses = await Promise.all(requests);
       
-      // All should succeed (no rate limiting implemented yet)
-      responses.forEach(response => {
+      responses.forEach((response: any) => {
         expect([200, 429]).toContain(response.status);
       });
     });

@@ -1,7 +1,4 @@
-/**
- * Database seeding script for Smart Autocomplete Search System
- * Loads sample words into the database and initializes the Trie
- */
+
 
 import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
@@ -9,7 +6,6 @@ import { join } from 'path';
 import { getDatabase } from '../src/utils/database';
 import { createTables } from './migrate';
 
-// Load environment variables
 dotenv.config();
 
 interface SeedWord {
@@ -23,41 +19,36 @@ interface SeedWord {
 async function seedDatabase() {
   const db = getDatabase({
     connectionString: process.env['DATABASE_URL']!,
-    ssl: true, // Always use SSL for Neon
+    ssl: true, 
   });
 
-  console.log('🌱 Starting database seeding...');
+  console.log(' Starting database seeding...');
 
   try {
-    // Ensure tables exist
     await createTables();
 
-    // Load sample data
     const dataPath = join(__dirname, '../../data/sample-words.json');
-    console.log(`📖 Loading sample data from: ${dataPath}`);
+    console.log(` Loading sample data from: ${dataPath}`);
     
     const rawData = readFileSync(dataPath, 'utf-8');
     const sampleWords: SeedWord[] = JSON.parse(rawData);
     
-    console.log(`📊 Found ${sampleWords.length} words to seed`);
+    console.log(` Found ${sampleWords.length} words to seed`);
 
-    // Clear existing data (optional - comment out to preserve existing data)
-    console.log('🧹 Clearing existing data...');
+    console.log(' Clearing existing data...');
     await db.query('DELETE FROM search_logs');
     await db.query('DELETE FROM words');
     await db.query('ALTER SEQUENCE words_id_seq RESTART WITH 1');
     await db.query('ALTER SEQUENCE search_logs_id_seq RESTART WITH 1');
 
-    // Insert words in batches for better performance
     const batchSize = 50;
     let insertedCount = 0;
 
     for (let i = 0; i < sampleWords.length; i += batchSize) {
       const batch = sampleWords.slice(i, i + batchSize);
       
-      console.log(`📝 Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(sampleWords.length / batchSize)}...`);
+      console.log(` Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(sampleWords.length / batchSize)}...`);
       
-      // Build batch insert query
       const values: any[] = [];
       const placeholders: string[] = [];
       
@@ -90,10 +81,9 @@ async function seedDatabase() {
       insertedCount += batch.length;
     }
 
-    console.log(`✅ Successfully seeded ${insertedCount} words`);
+    console.log(` Successfully seeded ${insertedCount} words`);
 
-    // Add some sample search logs for analytics
-    console.log('📊 Adding sample search logs for analytics...');
+    console.log(' Adding sample search logs for analytics...');
     
     const sampleSearches = [
       { query: 'hello', selected_word: 'hello' },
@@ -109,13 +99,11 @@ async function seedDatabase() {
     ];
 
     for (const search of sampleSearches) {
-      // Get word ID
       const wordResult = await db.query('SELECT id FROM words WHERE word = $1', [search.selected_word]);
       
       if (wordResult.rows.length > 0) {
         const wordId = wordResult.rows[0]!.id;
         
-        // Insert multiple search logs with different timestamps
         for (let i = 0; i < Math.floor(Math.random() * 5) + 1; i++) {
           const randomDaysAgo = Math.floor(Math.random() * 30);
           const timestamp = new Date();
@@ -126,16 +114,15 @@ async function seedDatabase() {
             VALUES ($1, $2, $3, $4, $5)
           `, [
             search.query,
-            Math.floor(Math.random() * 10) + 1, // Random result count
+            Math.floor(Math.random() * 10) + 1, 
             wordId,
-            Math.floor(Math.random() * 50) + 10, // Random response time 10-60ms
+            Math.floor(Math.random() * 50) + 10, 
             timestamp
           ]);
         }
       }
     }
 
-    // Display final statistics
     const stats = await db.query(`
       SELECT 
         (SELECT COUNT(*) FROM words) as word_count,
@@ -147,18 +134,17 @@ async function seedDatabase() {
     const { word_count, log_count, avg_frequency, category_count } = stats.rows[0]!;
 
     console.log(`
-🎉 Database seeding completed successfully!
+ Database seeding completed successfully!
 
-📊 Final Statistics:
+ Final Statistics:
    - Words: ${word_count}
    - Search logs: ${log_count}
    - Average frequency: ${parseFloat(avg_frequency).toFixed(2)}
    - Categories: ${category_count}
 
-🚀 The database is now ready for the Smart Autocomplete Search System!
+ The database is now ready for the Smart Autocomplete Search System!
     `);
 
-    // Test a few queries to verify data integrity
     console.log('🔍 Testing data integrity...');
     
     const testQueries = ['hello', 'programming', 'javascript'];
@@ -171,20 +157,19 @@ async function seedDatabase() {
     }
 
   } catch (error) {
-    console.error('❌ Seeding failed:', error);
+    console.error(' Seeding failed:', error);
     process.exit(1);
   }
 }
 
-// Run seeding if called directly
 if (require.main === module) {
   seedDatabase()
     .then(() => {
-      console.log('🎉 Seeding script completed');
+      console.log(' Seeding script completed');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('💥 Seeding script failed:', error);
+      console.error(' Seeding script failed:', error);
       process.exit(1);
     });
 }

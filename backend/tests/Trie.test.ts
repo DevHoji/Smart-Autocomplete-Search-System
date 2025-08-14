@@ -1,7 +1,4 @@
-/**
- * Comprehensive unit tests for the Trie implementation
- * Tests all core functionality including edge cases and performance characteristics
- */
+
 
 import { Trie } from '../src/models/Trie';
 
@@ -42,7 +39,7 @@ describe('Trie', () => {
 
     test('should handle duplicate insertions', () => {
       trie.insert('hello', 5);
-      trie.insert('hello', 3); // Should add to existing frequency
+      trie.insert('hello', 3); 
       
       const result = trie.searchExact('hello');
       expect(result).not.toBeNull();
@@ -122,7 +119,7 @@ describe('Trie', () => {
 
     test('should return all matches when k is larger than available', () => {
       const suggestions = trie.topK('hel', 10);
-      expect(suggestions).toHaveLength(3); // Only 3 words start with 'hel'
+      expect(suggestions).toHaveLength(3); 
     });
 
     test('should return empty array for non-existent prefix', () => {
@@ -138,7 +135,6 @@ describe('Trie', () => {
     test('should handle empty prefix', () => {
       const suggestions = trie.topK('', 3);
       expect(suggestions).toHaveLength(3);
-      // Should return top 3 words by frequency
       expect(suggestions[0]!.word).toBe('hello');
       expect(suggestions[1]!.word).toBe('help');
       expect(suggestions[2]!.word).toBe('world');
@@ -289,8 +285,8 @@ describe('Trie', () => {
       expect(stats.wordCount).toBe(4);
       expect(stats.totalFrequency).toBe(10);
       expect(stats.avgFrequency).toBe(2.5);
-      expect(stats.maxDepth).toBe(3); // 'abc' has depth 3
-      expect(stats.nodeCount).toBeGreaterThan(4); // At least 4 terminal nodes + internal nodes
+      expect(stats.maxDepth).toBe(3); 
+      expect(stats.nodeCount).toBeGreaterThan(4); 
     });
   });
 

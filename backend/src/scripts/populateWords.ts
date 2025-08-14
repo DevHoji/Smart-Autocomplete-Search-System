@@ -1,12 +1,8 @@
-/**
- * Script to populate the database with 5000 popular words
- * This replaces the existing small dataset with comprehensive vocabulary
- */
+
 
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 
-// Load environment variables
 dotenv.config();
 
 const pool = new Pool({
@@ -14,7 +10,6 @@ const pool = new Pool({
   ssl: process.env['NODE_ENV'] === 'production' ? { rejectUnauthorized: false } : false,
 });
 
-// Helper function to generate meaningful words for categories
 const generateMeaningfulWord = (category: string, index: number): string => {
   const categoryWords: Record<string, string[]> = {
     communication: ['message', 'phone', 'email', 'chat', 'talk', 'speak', 'voice', 'text', 'call', 'letter', 'mail', 'post', 'send', 'receive', 'reply', 'answer', 'question', 'ask', 'tell', 'say'],
@@ -55,9 +50,7 @@ const generateMeaningfulWord = (category: string, index: number): string => {
   return words[index % words.length] || `${category}${index}`;
 };
 
-// Generate 5000 most popular English words with categories and frequencies
 const generatePopularWords = () => {
-  // Base word lists for different categories
   const commonWords = [
     'the', 'and', 'you', 'that', 'was', 'for', 'are', 'with', 'his', 'they',
     'this', 'have', 'from', 'not', 'word', 'but', 'what', 'some', 'said', 'each',
@@ -139,11 +132,9 @@ const generatePopularWords = () => {
     'speed', 'agility', 'flexibility', 'balance', 'coordination', 'skill', 'technique', 'strategy', 'tactics', 'rules'
   ];
 
-  // Generate words with frequencies and categories
   const wordsList = [];
   let currentFreq = 100;
 
-  // Add common words (highest frequency)
   commonWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -154,7 +145,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 95;
 
-  // Add technology words
   technologyWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -165,7 +155,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 90;
 
-  // Add action words
   actionWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -176,7 +165,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 85;
 
-  // Add business words
   businessWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -187,7 +175,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 80;
 
-  // Add education words
   educationWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -198,7 +185,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 75;
 
-  // Add health words
   healthWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -209,7 +195,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 70;
 
-  // Add nature words
   natureWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -220,7 +205,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 65;
 
-  // Add food words
   foodWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -231,7 +215,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 60;
 
-  // Add travel words
   travelWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -242,7 +225,6 @@ const generatePopularWords = () => {
   });
   currentFreq = 55;
 
-  // Add sports words
   sportsWords.forEach((word, index) => {
     wordsList.push({
       word,
@@ -252,7 +234,6 @@ const generatePopularWords = () => {
     });
   });
 
-  // Generate additional words to reach 5000
   const additionalCategories = [
     'communication', 'media', 'entertainment', 'science', 'mathematics', 'geography',
     'history', 'literature', 'art', 'music', 'fashion', 'beauty', 'home', 'family',
@@ -261,7 +242,6 @@ const generatePopularWords = () => {
     'construction', 'manufacturing', 'agriculture', 'mining', 'energy', 'environment'
   ];
 
-  // Generate words for each additional category
   const wordsPerCategory = Math.floor((5000 - wordsList.length) / additionalCategories.length);
   let baseFreq = 50;
 
@@ -278,7 +258,6 @@ const generatePopularWords = () => {
     }
   });
 
-  // Fill remaining slots with numbered words if needed
   while (wordsList.length < 5000) {
     const remaining: number = 5000 - wordsList.length;
     wordsList.push({
@@ -289,7 +268,6 @@ const generatePopularWords = () => {
     });
   }
 
-  // Remove duplicates and return unique words
   const uniqueWords = new Map();
   wordsList.forEach(item => {
     if (!uniqueWords.has(item.word)) {
@@ -306,13 +284,12 @@ async function populateDatabase() {
   const client = await pool.connect();
 
   try {
-    console.log('🗑️  Clearing existing data...');
+    console.log('  Clearing existing data...');
     await client.query('DELETE FROM search_logs');
     await client.query('DELETE FROM words');
 
-    console.log('📝 Inserting 5000 popular words...');
+    console.log(' Inserting 5000 popular words...');
 
-    // Insert words in batches for better performance
     const batchSize = 100;
     let insertedCount = 0;
 
@@ -328,7 +305,7 @@ async function populateDatabase() {
         word.word,
         word.freq,
         word.category,
-        word.synonyms, // PostgreSQL array format
+        word.synonyms, 
         JSON.stringify({ category: word.category, synonyms: word.synonyms }),
         new Date()
       ]);
@@ -341,12 +318,11 @@ async function populateDatabase() {
       await client.query(query, params);
       insertedCount += batch.length;
 
-      console.log(`✅ Inserted ${insertedCount}/${popularWords.length} words`);
+      console.log(` Inserted ${insertedCount}/${popularWords.length} words`);
     }
 
-    console.log('🎉 Successfully populated database with popular words!');
+    console.log(' Successfully populated database with popular words!');
 
-    // Show statistics
     const result = await client.query(`
       SELECT
         COUNT(*) as total_words,
@@ -361,22 +337,21 @@ async function populateDatabase() {
     console.log(`   Categories: ${result.rows[0].categories}`);
 
   } catch (error) {
-    console.error('❌ Error populating database:', error);
+    console.error(' Error populating database:', error);
     throw error;
   } finally {
     client.release();
   }
 }
 
-// Run the script
 if (require.main === module) {
   populateDatabase()
     .then(() => {
-      console.log('✅ Database population completed successfully!');
+      console.log(' Database population completed successfully!');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('❌ Database population failed:', error);
+      console.error(' Database population failed:', error);
       process.exit(1);
     });
 }

@@ -20,7 +20,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   onSearch,
   className = '',
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [voiceInputUsed, setVoiceInputUsed] = useState(false);
@@ -52,7 +52,22 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   });
 
   // Handle keyboard navigation
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Handle Enter key for line breaks vs suggestion selection
+    if (event.key === 'Enter') {
+      if (state.isOpen && state.suggestions.length > 0 && state.selectedIndex >= 0 && !event.shiftKey) {
+        // If suggestions are open and one is selected, and it's not Shift+Enter, select it
+        event.preventDefault();
+        const cursorPosition = (event.target as HTMLTextAreaElement).selectionStart;
+        actions.selectSuggestion(state.selectedIndex, cursorPosition);
+        return;
+      } else {
+        // For Enter or Shift+Enter, allow line break (normal behavior)
+        // Don't prevent default - let the textarea handle it naturally
+        return;
+      }
+    }
+
     if (!state.isOpen || state.suggestions.length === 0) {
       return;
     }
@@ -68,13 +83,6 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         actions.previousSuggestion();
         break;
 
-      case 'Enter':
-        event.preventDefault();
-        if (state.selectedIndex >= 0) {
-          actions.selectSuggestion(state.selectedIndex);
-        }
-        break;
-
       case 'Escape':
         event.preventDefault();
         actions.clearSuggestions();
@@ -88,9 +96,64 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     }
   };
 
-  // Handle input change
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    actions.setQuery(event.target.value);
+  // Handle input change with auto-resize and auto line-break
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    let value = event.target.value;
+    const textarea = event.target;
+    const cursorPosition = textarea.selectionStart;
+
+    // Auto line-break when text reaches near the voice icons (approximately 60 characters per line)
+    value = autoWrapText(value, 60);
+
+    // Auto-resize textarea
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+
+    // If we modified the text, update the textarea value
+    if (value !== event.target.value) {
+      textarea.value = value;
+      // Adjust cursor position if text was wrapped
+      const newCursorPos = Math.min(cursorPosition, value.length);
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }
+
+    actions.setQuery(value, cursorPosition);
+  };
+
+  // Auto-wrap text function
+  const autoWrapText = (text: string, maxLineLength: number): string => {
+    const lines = text.split('\n');
+    const wrappedLines: string[] = [];
+
+    for (const line of lines) {
+      if (line.length <= maxLineLength) {
+        wrappedLines.push(line);
+      } else {
+        // Split long lines at word boundaries
+        const words = line.split(' ');
+        let currentLine = '';
+
+        for (const word of words) {
+          if ((currentLine + ' ' + word).length <= maxLineLength) {
+            currentLine = currentLine ? currentLine + ' ' + word : word;
+          } else {
+            if (currentLine) {
+              wrappedLines.push(currentLine);
+              currentLine = word;
+            } else {
+              // Word is longer than max length, split it
+              wrappedLines.push(word);
+            }
+          }
+        }
+
+        if (currentLine) {
+          wrappedLines.push(currentLine);
+        }
+      }
+    }
+
+    return wrappedLines.join('\n');
   };
 
   // Handle input focus
@@ -117,7 +180,8 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
     const index = state.suggestions.findIndex(s => s.word === suggestion.word);
     if (index >= 0) {
-      actions.selectSuggestion(index);
+      const cursorPosition = inputRef.current?.selectionStart || 0;
+      actions.selectSuggestion(index, cursorPosition);
     }
 
     // Focus back to input after selection
@@ -216,20 +280,25 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
           <Search className="h-5 w-5 text-gray-400" />
         </div>
 
-        <input
-          ref={inputRef}
-          type="text"
+        <textarea
+          ref={inputRef as React.RefObject<HTMLTextAreaElement>}
           value={state.query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           placeholder={placeholder}
-          className={`input-field text-lg pl-12 pr-24 ${state.error ? 'border-red-500 focus:border-red-500' : ''}`}
+          className={`input-field text-lg pl-12 pr-24 resize-none min-h-[60px] max-h-[200px] overflow-y-auto ${state.error ? 'border-red-500 focus:border-red-500' : ''}`}
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
           aria-autocomplete="list"
           role="combobox"
+          rows={1}
+          style={{
+            wordWrap: 'break-word',
+            whiteSpace: 'pre-wrap',
+            lineHeight: '1.5'
+          }}
         />
 
         {/* Right side icons */}
@@ -243,7 +312,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
           {/* Image OCR Button */}
           <button
             onClick={() => setIsImageOCROpen(true)}
-            className="p-2 text-gray-400 hover:text-yellow-400 transition-all duration-300 rounded-lg hover:scale-110"
+            className="p-2 text-gray-400 hover:text-yellow-400 transition-colors duration-200 rounded-lg hover:bg-gray-700/50"
             aria-label="Extract text from image"
             title="Upload image to extract text"
           >

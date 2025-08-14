@@ -89,16 +89,27 @@ class ApiService {
     maxResults: number = 10,
     category?: string
   ): Promise<SuggestResponse> {
-    const params = new URLSearchParams({
-      prefix,
-      k: maxResults.toString(),
-    });
-    if (category) params.append('category', category);
+    try {
+      const params = new URLSearchParams({
+        prefix,
+        k: maxResults.toString(),
+      });
+      if (category) params.append('category', category);
 
-    const response = await this.client.get<SuggestResponse>(
-      `/api/suggest?${params.toString()}`
-    );
-    return response.data;
+      const response = await this.client.get<SuggestResponse>(
+        `/api/suggest?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      // Return empty suggestions on error to maintain UX
+      console.warn('Failed to get suggestions:', error);
+      return {
+        suggestions: [],
+        prefix: prefix || '',
+        total: 0,
+        fuzzy: false,
+      };
+    }
   }
 
   async selectSuggestion(request: SelectRequest): Promise<SelectResponse> {

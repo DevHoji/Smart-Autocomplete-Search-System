@@ -22,28 +22,63 @@ function App() {
   const [currentView, setCurrentView] = useState<'search' | 'analytics' | 'settings' | 'test'>('search');
 
   useEffect(() => {
-    // Test API connection on startup
-    const testConnection = async () => {
+    // Test API connection on startup with retry logic
+    const testConnection = async (retryCount = 0) => {
       try {
         const connected = await apiService.testConnection();
         setIsConnected(connected);
+        setConnectionError(null);
 
         if (connected) {
           // Load initial analytics data
-          const analyticsData = await apiService.getAnalytics(7);
-          setAnalytics(analyticsData);
+          try {
+            const analyticsData = await apiService.getAnalytics(7);
+            setAnalytics(analyticsData);
+          } catch (error) {
+            console.warn('Failed to load analytics data:', error);
+            // Don't fail the connection for analytics errors
+          }
         } else {
           setConnectionError('Unable to connect to the backend server');
         }
       } catch (error) {
         setIsConnected(false);
-        setConnectionError('Failed to connect to the backend server');
         console.error('Connection test failed:', error);
+
+        // Retry up to 5 times with exponential backoff
+        if (retryCount < 5) {
+          const delay = Math.min(Math.pow(2, retryCount) * 1000, 10000); // Max 10s delay
+          setTimeout(() => testConnection(retryCount + 1), delay);
+          setConnectionError(`Retrying connection... (${retryCount + 1}/5)`);
+        } else {
+          setConnectionError('Failed to connect to the backend server after 5 attempts');
+        }
       }
     };
 
     testConnection();
-  }, []);
+
+    // Set up periodic connection health check
+    const healthCheckInterval = setInterval(async () => {
+      try {
+        const connected = await apiService.testConnection();
+        if (!connected && isConnected) {
+          setIsConnected(false);
+          setConnectionError('Connection lost - attempting to reconnect...');
+          testConnection();
+        } else if (connected && !isConnected) {
+          setIsConnected(true);
+          setConnectionError(null);
+        }
+      } catch (error) {
+        console.warn('Health check failed:', error);
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => {
+      clearInterval(healthCheckInterval);
+    };
+  }, [isConnected]);
 
   // Handle suggestion selection
   const handleSuggestionSelect = (suggestion: Suggestion) => {
@@ -161,7 +196,27 @@ function App() {
               {connectionError}. Please make sure the backend server is running on port 3001.
             </p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={async () => {
+                setConnectionError('Testing connection...');
+                try {
+                  const connected = await apiService.testConnection();
+                  setIsConnected(connected);
+                  if (connected) {
+                    setConnectionError(null);
+                    try {
+                      const analyticsData = await apiService.getAnalytics(7);
+                      setAnalytics(analyticsData);
+                    } catch (error) {
+                      console.warn('Failed to load analytics data:', error);
+                    }
+                  } else {
+                    setConnectionError('Unable to connect to the backend server');
+                  }
+                } catch (error) {
+                  setConnectionError('Failed to connect to the backend server');
+                  console.error('Retry connection failed:', error);
+                }
+              }}
               className="btn-primary"
             >
               Retry Connection

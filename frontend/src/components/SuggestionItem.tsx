@@ -48,21 +48,29 @@ const SuggestionItem: React.FC<SuggestionItemProps> = ({
   const getCategoryColor = (category?: string) => {
     switch (category) {
       case 'technology':
-        return 'text-blue-600 bg-blue-100';
+        return 'text-white bg-gradient-to-r from-blue-500 to-purple-600';
       case 'person':
-        return 'text-green-600 bg-green-100';
+        return 'text-white bg-gradient-to-r from-green-500 to-teal-600';
       case 'action':
-        return 'text-purple-600 bg-purple-100';
+        return 'text-white bg-gradient-to-r from-purple-500 to-pink-600';
       case 'communication':
-        return 'text-orange-600 bg-orange-100';
+        return 'text-white bg-gradient-to-r from-orange-500 to-red-600';
       case 'media':
-        return 'text-pink-600 bg-pink-100';
+        return 'text-white bg-gradient-to-r from-pink-500 to-rose-600';
       case 'web':
-        return 'text-indigo-600 bg-indigo-100';
+        return 'text-white bg-gradient-to-r from-indigo-500 to-blue-600';
       case 'work':
-        return 'text-yellow-600 bg-yellow-100';
+        return 'text-black bg-gradient-to-r from-yellow-400 to-orange-500';
+      case 'noun':
+        return 'text-white bg-gradient-to-r from-emerald-500 to-green-600';
+      case 'adjective':
+        return 'text-white bg-gradient-to-r from-violet-500 to-purple-600';
+      case 'verb':
+        return 'text-white bg-gradient-to-r from-rose-500 to-pink-600';
+      case 'amharic':
+        return 'text-white bg-gradient-to-r from-amber-500 to-yellow-600';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-white bg-gradient-to-r from-gray-500 to-gray-600';
     }
   };
 
@@ -90,12 +98,12 @@ const SuggestionItem: React.FC<SuggestionItemProps> = ({
         <div className="flex-1 min-w-0">
           {/* Main word */}
           <div className="flex items-center space-x-2">
-            <span className="text-gray-900 font-medium truncate">
+            <span className="text-yellow-300 font-bold text-lg truncate">
               {highlightText(suggestion.word, highlightQuery)}
             </span>
-            
+
             {/* Frequency badge */}
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-bold bg-cyan-500 text-white shadow-lg">
               {suggestion.freq}
             </span>
           </div>
@@ -103,18 +111,18 @@ const SuggestionItem: React.FC<SuggestionItemProps> = ({
           {/* Synonyms */}
           {suggestion.synonyms && suggestion.synonyms.length > 0 && (
             <div className="mt-1 flex items-center space-x-1">
-              <span className="text-xs text-gray-500">Also:</span>
+              <span className="text-sm text-green-400 font-medium">Also:</span>
               <div className="flex flex-wrap gap-1">
                 {suggestion.synonyms.slice(0, 3).map((synonym, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-50 text-gray-600"
+                    className="inline-flex items-center px-2 py-1 rounded-full text-sm bg-green-600 text-white font-medium"
                   >
                     {synonym}
                   </span>
                 ))}
                 {suggestion.synonyms.length > 3 && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-sm text-green-300 font-medium">
                     +{suggestion.synonyms.length - 3} more
                   </span>
                 )}
@@ -140,11 +148,11 @@ const SuggestionItem: React.FC<SuggestionItemProps> = ({
 
       {/* Metadata */}
       {suggestion.metadata && Object.keys(suggestion.metadata).length > 0 && (
-        <div className="mt-2 text-xs text-gray-500">
+        <div className="mt-2 text-sm text-blue-300 font-medium">
           {Object.entries(suggestion.metadata)
             .slice(0, 2)
             .map(([key, value]) => (
-              <span key={key} className="mr-3">
+              <span key={key} className="mr-3 bg-blue-800 px-2 py-1 rounded">
                 {key}: {String(value)}
               </span>
             ))}

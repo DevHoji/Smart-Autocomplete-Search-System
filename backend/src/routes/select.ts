@@ -1,10 +1,4 @@
-/**
- * Select endpoint - Learning functionality
- * POST /api/select
- * 
- * Records when a user selects a suggestion, incrementing its frequency
- * This enables the system to learn and improve suggestions over time
- */
+
 
 import { Router, Request, Response } from 'express';
 import { TrieService } from '@/services/TrieService';
@@ -15,42 +9,25 @@ import { SelectRequest } from '@/types';
 const router = Router();
 const trieService = TrieService.getInstance();
 
-/**
- * POST /api/select
- * Record a suggestion selection for learning
- * 
- * Body:
- * - word: string (required) - The selected word
- * - prefix: string (required) - The prefix that was searched
- * - user_id: string (optional) - User identifier for analytics
- * 
- * Response:
- * - success: boolean - Whether the selection was recorded
- * - newFreq: number - New frequency of the selected word
- * - word: string - The selected word
- */
+
 router.post('/', 
   validateRequest(selectBodySchema, 'body'),
   asyncHandler(async (req: Request, res: Response) => {
     const startTime = Date.now();
     
-    // Extract request data
     const { word, prefix, user_id } = req.body as SelectRequest;
     const userId = user_id || req.headers['x-user-id'] as string;
 
     try {
-      // Record the selection
       const result = await trieService.selectSuggestion(word, prefix, userId);
       
       const responseTime = Date.now() - startTime;
 
-      // Add performance headers
       res.set({
         'X-Response-Time': `${responseTime}ms`,
         'X-Learning-Status': 'SUCCESS',
       });
 
-      // Return success response
       res.json({
         success: result.success,
         newFreq: result.newFreq,
@@ -69,7 +46,6 @@ router.post('/',
         'X-Learning-Status': 'FAILED',
       });
 
-      // Check if it's a word not found error
       if (error instanceof Error && error.message.includes('not found')) {
         res.status(404).json({
           success: false,
@@ -95,19 +71,7 @@ router.post('/',
   })
 );
 
-/**
- * POST /api/select/batch
- * Record multiple selections at once
- * 
- * Body:
- * - selections: Array of SelectRequest objects
- * 
- * Response:
- * - success: boolean - Whether all selections were recorded
- * - results: Array of individual results
- * - total: number - Total selections processed
- * - successful: number - Number of successful selections
- */
+
 router.post('/batch', 
   asyncHandler(async (req: Request, res: Response) => {
     const startTime = Date.now();
@@ -148,10 +112,8 @@ router.post('/batch',
     let successful = 0;
 
     try {
-      // Process each selection
       for (const selection of selections) {
         try {
-          // Validate individual selection
           const { error } = selectBodySchema.validate(selection);
           if (error) {
             results.push({
@@ -162,7 +124,6 @@ router.post('/batch',
             continue;
           }
 
-          // Record the selection
           const result = await trieService.selectSuggestion(
             selection.word,
             selection.prefix,
@@ -204,12 +165,13 @@ router.post('/batch',
         failed: selections.length - successful,
         timestamp: new Date().toISOString(),
       });
+      return;
 
     } catch (error) {
       console.error('Error in batch select endpoint:', error);
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       res.set({
         'X-Response-Time': `${responseTime}ms`,
         'X-Batch-Status': 'FAILED',
@@ -224,6 +186,7 @@ router.post('/batch',
         results: results,
         timestamp: new Date().toISOString(),
       });
+      return;
     }
   })
 );

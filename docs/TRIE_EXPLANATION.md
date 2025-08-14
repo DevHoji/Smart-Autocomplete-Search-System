@@ -18,11 +18,11 @@ This Smart Autocomplete Search System uses a **server-side Trie (Prefix Tree)** 
 
 ```typescript
 class TrieNodeImpl implements TrieNode {
-  public children: Map<string, TrieNode>;  // Unicode-safe character mapping
-  public isEndOfWord: boolean;             // Marks valid word endings
-  public word?: string;                    // Stores complete word at terminal nodes
-  public freq: number;                     // Frequency/weight for ranking
-  public metadata?: Record<string, any>;   // Extensible data (categories, synonyms)
+  public children: Map<string, TrieNode>;
+  public isEndOfWord: boolean;             
+  public word?: string;                    
+  public freq: number;                     
+  public metadata?: Record<string, any>;   
 }
 ```
 

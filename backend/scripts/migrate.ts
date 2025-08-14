@@ -1,28 +1,22 @@
-/**
- * Database migration script for Smart Autocomplete Search System
- * Creates the necessary tables for storing words and analytics data
- */
+
 
 import dotenv from 'dotenv';
 import { getDatabase } from '../src/utils/database';
 
-// Load environment variables
 dotenv.config();
 
 async function createTables() {
   const db = getDatabase({
     connectionString: process.env['DATABASE_URL']!,
-    ssl: true, // Always use SSL for Neon
+    ssl: true, 
   });
 
-  console.log('🔄 Starting database migration...');
+  console.log(' Starting database migration...');
 
   try {
-    // Test connection
     await db.testConnection();
 
-    // Create words table
-    console.log('📝 Creating words table...');
+    console.log(' Creating words table...');
     await db.query(`
       CREATE TABLE IF NOT EXISTS words (
         id SERIAL PRIMARY KEY,
@@ -37,8 +31,7 @@ async function createTables() {
       );
     `);
 
-    // Create indexes for better performance
-    console.log('🔍 Creating indexes...');
+    console.log(' Creating indexes...');
     await db.query(`
       CREATE INDEX IF NOT EXISTS idx_words_word ON words(word);
       CREATE INDEX IF NOT EXISTS idx_words_freq ON words(freq DESC);
@@ -47,8 +40,7 @@ async function createTables() {
       CREATE INDEX IF NOT EXISTS idx_words_last_selected ON words(last_selected DESC);
     `);
 
-    // Create search_logs table for analytics
-    console.log('📊 Creating search_logs table...');
+    console.log(' Creating search_logs table...');
     await db.query(`
       CREATE TABLE IF NOT EXISTS search_logs (
         id SERIAL PRIMARY KEY,
@@ -62,7 +54,6 @@ async function createTables() {
       );
     `);
 
-    // Create indexes for search_logs
     await db.query(`
       CREATE INDEX IF NOT EXISTS idx_search_logs_query_text ON search_logs(query_text);
       CREATE INDEX IF NOT EXISTS idx_search_logs_user_id ON search_logs(user_id);
@@ -71,7 +62,6 @@ async function createTables() {
       CREATE INDEX IF NOT EXISTS idx_search_logs_search_type ON search_logs(search_type);
     `);
 
-    // Create trigger to update updated_at timestamp
     console.log('⚡ Creating triggers...');
     await db.query(`
       CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -91,8 +81,7 @@ async function createTables() {
         EXECUTE FUNCTION update_updated_at_column();
     `);
 
-    // Create view for analytics
-    console.log('📈 Creating analytics views...');
+    console.log(' Creating analytics views...');
     await db.query(`
       CREATE OR REPLACE VIEW word_analytics AS
       SELECT 
@@ -110,31 +99,29 @@ async function createTables() {
       GROUP BY w.id, w.word, w.freq, w.category, w.created_at, w.updated_at, w.last_selected;
     `);
 
-    console.log('✅ Database migration completed successfully!');
+    console.log(' Database migration completed successfully!');
     
-    // Display table information
     const wordsCount = await db.query('SELECT COUNT(*) FROM words');
     const logsCount = await db.query('SELECT COUNT(*) FROM search_logs');
     
-    console.log(`📊 Current data:
+    console.log(` Current data:
     - Words: ${wordsCount.rows[0]?.count || 0}
     - Search logs: ${logsCount.rows[0]?.count || 0}`);
 
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error(' Migration failed:', error);
     process.exit(1);
   }
 }
 
-// Run migration if called directly
 if (require.main === module) {
   createTables()
     .then(() => {
-      console.log('🎉 Migration script completed');
+      console.log(' Migration script completed');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('💥 Migration script failed:', error);
+      console.error(' Migration script failed:', error);
       process.exit(1);
     });
 }

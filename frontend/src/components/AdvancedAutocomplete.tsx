@@ -340,6 +340,24 @@ const AdvancedAutocomplete: React.FC<AdvancedAutocompleteProps> = ({
           spellCheck={false} // We handle spell checking manually
         />
 
+        {/* Spell check overlay */}
+        {enableSpellCheck && (
+          <div className="absolute inset-0 pointer-events-none text-white whitespace-nowrap overflow-hidden pl-12 pr-24 py-3 text-lg leading-6">
+            {state.query.split(/(\s+)/).map((word, index) => {
+              const trimmedWord = word.trim();
+              const isMisspelled = misspelledWords.some(mw => mw.word === trimmedWord);
+              return (
+                <span
+                  key={index}
+                  className={isMisspelled ? 'text-transparent bg-red-500 bg-opacity-20 border-b-2 border-red-500 border-dotted' : 'text-transparent'}
+                >
+                  {word}
+                </span>
+              );
+            })}
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 space-x-2">
           {/* Voice Input */}

@@ -1,11 +1,7 @@
-/**
- * Validation schemas for API endpoints using Joi
- * Provides consistent validation across all routes
- */
+
 
 import Joi from 'joi';
 
-// Suggest endpoint validation
 export const suggestQuerySchema = Joi.object({
   prefix: Joi.string()
     .min(1)
@@ -37,7 +33,6 @@ export const suggestQuerySchema = Joi.object({
     })
 });
 
-// Select endpoint validation
 export const selectBodySchema = Joi.object({
   word: Joi.string()
     .min(1)
@@ -67,7 +62,6 @@ export const selectBodySchema = Joi.object({
     })
 });
 
-// Insert endpoint validation
 export const insertBodySchema = Joi.object({
   word: Joi.string()
     .min(1)
@@ -124,7 +118,6 @@ export const insertBodySchema = Joi.object({
     })
 });
 
-// Analytics query validation
 export const analyticsQuerySchema = Joi.object({
   days: Joi.number()
     .integer()
@@ -139,7 +132,6 @@ export const analyticsQuerySchema = Joi.object({
     })
 });
 
-// Export Trie query validation
 export const exportQuerySchema = Joi.object({
   format: Joi.string()
     .valid('json')
@@ -155,7 +147,6 @@ export const exportQuerySchema = Joi.object({
     })
 });
 
-// Common validation helpers
 export const validatePositiveInteger = (value: any, fieldName: string) => {
   const schema = Joi.number().integer().min(1).required();
   const { error } = schema.validate(value);
@@ -178,7 +169,6 @@ export const validateStringLength = (value: any, fieldName: string, maxLength: n
   return value;
 };
 
-// Rate limiting validation
 export const rateLimitSchema = Joi.object({
   windowMs: Joi.number()
     .integer()

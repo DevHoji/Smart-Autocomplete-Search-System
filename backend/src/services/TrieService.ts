@@ -1,17 +1,8 @@
-/**
- * TrieService - Business logic layer for Trie operations
- * 
- * This service manages the in-memory Trie instance and provides:
- * - Singleton Trie instance management
- * - Database synchronization
- * - Real-time updates via Socket.IO
- * - Analytics tracking
- * - Error handling and validation
- */
+
 
 import { Trie } from '@/models/Trie';
 import { getDatabase } from '@/utils/database';
-import { Word, TrieSuggestion, SearchLog, AnalyticsStats } from '@/types';
+import { Word, TrieSuggestion, AnalyticsStats } from '@/types';
 import { Server as SocketIOServer } from 'socket.io';
 import { FuzzyService } from './fuzzyService';
 
@@ -26,9 +17,7 @@ export class TrieService {
     this.fuzzyService = FuzzyService.getInstance();
   }
 
-  /**
-   * Get singleton instance of TrieService
-   */
+ 
   public static getInstance(): TrieService {
     if (!TrieService.instance) {
       TrieService.instance = new TrieService();
@@ -36,19 +25,13 @@ export class TrieService {
     return TrieService.instance;
   }
 
-  /**
-   * Initialize the service with Socket.IO instance
-   */
+ 
   public initialize(io: SocketIOServer): void {
     this.io = io;
-    // Initialize FuzzyService with this TrieService instance
     this.fuzzyService.initialize(this);
   }
 
-  /**
-   * Load words from database into Trie
-   * Called during server startup
-   */
+  
   public async loadFromDatabase(): Promise<void> {
     const db = getDatabase();
     
@@ -72,7 +55,6 @@ export class TrieService {
       const stats = this.trie.getStats();
       console.log(`Trie loaded successfully:`, stats);
 
-      // Update fuzzy search cache after Trie is loaded
       this.fuzzyService.refreshCache();
 
     } catch (error) {
@@ -81,9 +63,7 @@ export class TrieService {
     }
   }
 
-  /**
-   * Get autocomplete suggestions for a prefix with fuzzy fallback
-   */
+ 
   public async getSuggestions(
     prefix: string,
     k: number = 10,
@@ -98,10 +78,8 @@ export class TrieService {
     const startTime = Date.now();
 
     try {
-      // First try exact prefix matching
       const exactSuggestions = this.trie.topK(prefix, k, category);
 
-      // If we have enough exact matches, return them
       if (exactSuggestions.length >= k || !this.fuzzyService.shouldUseFuzzySearch(prefix, exactSuggestions.length)) {
         const responseTime = Date.now() - startTime;
         await this.logSearch(prefix, exactSuggestions.length, responseTime, userId);
@@ -114,11 +92,9 @@ export class TrieService {
         };
       }
 
-      // Use hybrid approach: combine exact and fuzzy matches
       const hybridResult = await this.fuzzyService.getHybridSuggestions(prefix, k, category);
       const responseTime = Date.now() - startTime;
 
-      // Log the search for analytics
       await this.logSearch(prefix, hybridResult.suggestions.length, responseTime, userId, hybridResult.fuzzy);
 
       return {
@@ -134,9 +110,7 @@ export class TrieService {
     }
   }
 
-  /**
-   * Record a suggestion selection (learning)
-   */
+ 
   public async selectSuggestion(
     word: string, 
     prefix: string, 
@@ -145,14 +119,12 @@ export class TrieService {
     const db = getDatabase();
     
     try {
-      // Increment frequency in Trie
       const newFreq = this.trie.incrementFrequency(word, 1);
       
       if (newFreq === -1) {
         throw new Error(`Word '${word}' not found in Trie`);
       }
 
-      // Update database
       await db.query(`
         UPDATE words 
         SET freq = freq + 1, 
@@ -161,10 +133,8 @@ export class TrieService {
         WHERE word = $1
       `, [word]);
 
-      // Log the selection for analytics
       await this.logSelection(word, prefix, userId);
 
-      // Emit real-time update
       this.emitTrieUpdate('update', word, newFreq);
 
       return { success: true, newFreq };
@@ -175,9 +145,7 @@ export class TrieService {
     }
   }
 
-  /**
-   * Insert a new word into the Trie and database
-   */
+ 
   public async insertWord(
     word: string,
     freq: number = 1,
@@ -189,14 +157,12 @@ export class TrieService {
     const db = getDatabase();
     
     try {
-      // Insert into Trie
       this.trie.insert(word, freq, {
         category,
         synonyms,
         ...metadata,
       });
 
-      // Insert into database
       await db.query(`
         INSERT INTO words (word, freq, category, synonyms, metadata, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
@@ -206,10 +172,8 @@ export class TrieService {
           updated_at = NOW()
       `, [word, freq, category, synonyms, metadata]);
 
-      // Log the insertion
       await this.logSearch(word, 1, 0, userId, 'insert');
 
-      // Emit real-time update
       this.emitTrieUpdate('insert', word, freq);
 
       return { success: true, word };
@@ -220,49 +184,36 @@ export class TrieService {
     }
   }
 
-  /**
-   * Export Trie as JSON
-   */
+ 
   public exportTrie(): any {
     return this.trie.toJSON();
   }
 
-  /**
-   * Get Trie statistics
-   */
+  
   public getTrieStats(): any {
     return this.trie.getStats();
   }
 
-  /**
-   * Get all words from Trie (used by FuzzyService)
-   */
+  
   public getAllWords(): TrieSuggestion[] {
     return this.trie.getAllWords();
   }
 
-  /**
-   * Get direct suggestions from Trie without fuzzy fallback (used by FuzzyService)
-   */
+  
   public getDirectSuggestions(prefix: string, k: number = 10, category?: string): TrieSuggestion[] {
     return this.trie.topK(prefix, k, category);
   }
 
-  /**
-   * Search for exact word match in Trie
-   */
+  
   public searchExact(word: string): TrieSuggestion | null {
     return this.trie.searchExact(word);
   }
 
-  /**
-   * Get analytics data
-   */
+  
   public async getAnalytics(days: number = 7): Promise<AnalyticsStats> {
     const db = getDatabase();
     
     try {
-      // Get total searches and selections
       const totalsResult = await db.query(`
         SELECT 
           COUNT(*) as total_searches,
@@ -277,7 +228,6 @@ export class TrieService {
         ? (totals.total_selections / totals.total_searches) * 100 
         : 0;
 
-      // Get top queries
       const topQueriesResult = await db.query(`
         SELECT query_text, COUNT(*) as count
         FROM search_logs 
@@ -288,7 +238,6 @@ export class TrieService {
         LIMIT 10
       `);
 
-      // Get top words by frequency
       const topWordsResult = await db.query(`
         SELECT w.word, w.freq, COUNT(sl.selected_word_id) as selections
         FROM words w
@@ -299,7 +248,6 @@ export class TrieService {
         LIMIT 10
       `);
 
-      // Get trending words (words with recent activity)
       const trendingResult = await db.query(`
         SELECT 
           w.word,
@@ -342,11 +290,7 @@ export class TrieService {
     }
   }
 
-  // Private helper methods
-
-  /**
-   * Log search query for analytics
-   */
+  
   private async logSearch(
     query: string,
     resultCount: number,
@@ -357,7 +301,6 @@ export class TrieService {
     const db = getDatabase();
 
     try {
-      // Convert fuzzy parameter to appropriate type
       const searchType = typeof fuzzy === 'string' ? fuzzy : (fuzzy ? 'fuzzy' : 'exact');
 
       await db.query(`
@@ -366,14 +309,11 @@ export class TrieService {
       `, [query, userId, resultCount, responseTime, searchType]);
 
     } catch (error) {
-      // Don't throw on logging errors, just log them
       console.error('Failed to log search:', error);
     }
   }
 
-  /**
-   * Log suggestion selection for analytics
-   */
+ 
   private async logSelection(
     word: string, 
     prefix: string, 
@@ -382,7 +322,6 @@ export class TrieService {
     const db = getDatabase();
     
     try {
-      // Get word ID
       const wordResult = await db.query(`
         SELECT id FROM words WHERE word = $1
       `, [word]);
@@ -395,14 +334,11 @@ export class TrieService {
       }
       
     } catch (error) {
-      // Don't throw on logging errors, just log them
       console.error('Failed to log selection:', error);
     }
   }
 
-  /**
-   * Emit real-time Trie update via Socket.IO
-   */
+  
   private emitTrieUpdate(
     type: 'insert' | 'update' | 'delete', 
     word: string, 

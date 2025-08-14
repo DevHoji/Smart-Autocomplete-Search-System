@@ -220,7 +220,10 @@ const MultiModeAutocomplete: React.FC<MultiModeAutocompleteProps> = ({
 
   // Handle suggestion selection
   const handleSuggestionSelect = (suggestion: Suggestion) => {
-    actions.selectSuggestion(suggestion);
+    const index = state.suggestions.findIndex(s => s.word === suggestion.word);
+    if (index >= 0) {
+      actions.selectSuggestion(index);
+    }
   };
 
   // Handle keyboard navigation
@@ -229,11 +232,11 @@ const MultiModeAutocomplete: React.FC<MultiModeAutocompleteProps> = ({
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          actions.navigateDown();
+          actions.nextSuggestion();
           break;
         case 'ArrowUp':
           e.preventDefault();
-          actions.navigateUp();
+          actions.previousSuggestion();
           break;
         case 'Enter':
           e.preventDefault();
@@ -287,16 +290,16 @@ const MultiModeAutocomplete: React.FC<MultiModeAutocompleteProps> = ({
 
     const value = inputRef.current.value;
     const words = value.split(/(\s+)/);
-    
+
     return (
-      <div className="absolute inset-0 pointer-events-none text-transparent whitespace-pre-wrap break-words">
+      <div className="absolute inset-0 pointer-events-none text-white whitespace-nowrap overflow-hidden pl-12 pr-32 py-4 text-base leading-6">
         {words.map((word, index) => {
           const trimmedWord = word.trim();
           const isMisspelled = misspelledWords.some(mw => mw.word === trimmedWord);
           return (
             <span
               key={index}
-              className={isMisspelled ? 'border-b-2 border-red-500' : ''}
+              className={isMisspelled ? 'text-transparent bg-red-500 bg-opacity-20 border-b-2 border-red-500 border-dotted' : 'text-transparent'}
             >
               {word}
             </span>
